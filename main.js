@@ -17,6 +17,23 @@ let currentPillarX = 0; // Vị trí cột hiện tại
 let isAnimating = false; // Ngăn spam click
 let collegeFailAllowed = false; // Khi vào Đại học, không cho phép sai
 
+// Biến di chuyển cột
+let pillarMoving = false;
+let pillarMoveInterval = null;
+let pillarMoveDirection = 1; // 1: sang phải, -1: sang trái
+let pillarMoveSpeed = 0;
+let maxBridgeLength = 300; // Giới hạn chiều dài cầu
+let bridgeGrowthDirection = 1; // 1: tăng, -1: giảm
+
+// Quản lý các cột đã qua
+let passedPillars = [];
+const maxVisiblePassedPillars = 5; // Hiển thị tối đa 5 cột đã qua
+// Lưu vị trí ban đầu của cột tiếp theo (trước khi di chuyển)
+let initialNextPillarLeft = 0;
+
+// Hệ thống độ khó tăng dần khi chết
+let deathCount = 0; // Số lần chết ở màn hiện tại
+let lastDeathLevel = 0; // Level cuối cùng chết
 // Cấu trúc chương học
 const chapters = [
     { name: "Tiểu Học Cơ Sở", start: 1, end: 5 },
@@ -116,6 +133,86 @@ function isInCollege() {
     return currentLevelNum >= 13;
 }
 
+// Lấy tốc độ xây cầu theo cấp độ VÀ số lần chết
+function getBridgeSpeed() {
+    // Tốc độ tăng TUYẾN TÍNH từ level 1 (5) đến level 12 (15)
+    // Level 1-5: 5 -> 7
+    // Level 6-9: 7 -> 10
+    // Level 10-12: 10 -> 15
+    // Level 13-16 (Đại học): gấp đôi
+    
+    let baseSpeed;
+    if (currentLevelNum <= 5) {
+        // Tiểu học: 5 -> 7
+        baseSpeed = 5 + (currentLevelNum - 1) * 0.5;
+    } else if (currentLevelNum <= 9) {
+        // THCS: 7 -> 10
+        baseSpeed = 7 + (currentLevelNum - 6) * 0.75;
+    } else if (currentLevelNum <= 12) {
+        // THPT: 10 -> 15
+        baseSpeed = 10 + (currentLevelNum - 10) * 1.67;
+    } else {
+        // Đại học: 15 -> 20
+        baseSpeed = 15 + (currentLevelNum - 13) * 1.25;
+    }
+    
+    // Tăng tốc độ mỗi lần chết (+2 mỗi lần thay vì +1.5)
+    const deathPenalty = deathCount * 2;
+    
+    // Nếu ở Đại học, khó GẤP ĐÔI
+    const collegeMultiplier = isInCollege() ? 2 : 1;
+    
+    return (baseSpeed + deathPenalty) * collegeMultiplier;
+}
+
+// Kiểm tra xem cột có nên di chuyển không
+function shouldPillarMove() {
+    return false; // TẮT tính năng di chuyển cột
+}
+
+// Lấy tốc độ di chuyển cột
+function getPillarMoveSpeed() {
+    if (currentLevelNum === 4 || currentLevelNum === 5) return 0.5; // Tiểu học: chậm
+    if (currentLevelNum === 9) return 1; // THCS: trung bình
+    if (currentLevelNum === 12) return 1.5; // THPT: nhanh
+    if (currentLevelNum === 16) return 2; // Đại học năm 4: rất nhanh
+    return 0;
+}
+
+// Bắt đầu di chuyển cột
+function startPillarMovement() {
+    if (!shouldPillarMove()) return;
+    
+    pillarMoving = true;
+    pillarMoveSpeed = getPillarMoveSpeed();
+    const centerPosition = initialNextPillarLeft; // Vị trí ban đầu của cột (đã ngẫu nhiên)
+    let pillarPosition = centerPosition;
+    const moveRange = 20; // Di chuyển ±20px xung quanh vị trí ban đầu
+    
+    pillarMoveInterval = setInterval(() => {
+        pillarPosition += pillarMoveSpeed * pillarMoveDirection;
+        
+        // Đổi hướng khi chạm biên (xung quanh vị trí ban đầu)
+        if (pillarPosition >= centerPosition + moveRange) {
+            pillarMoveDirection = -1;
+        } else if (pillarPosition <= centerPosition - moveRange) {
+            pillarMoveDirection = 1;
+        }
+        
+        pillarNext.style.left = pillarPosition + "px";
+    }, 30);
+}
+
+// Dừng di chuyển cột
+function stopPillarMovement() {
+    if (pillarMoveInterval) {
+        clearInterval(pillarMoveInterval);
+        pillarMoveInterval = null;
+        pillarMoving = false;
+        pillarMoveDirection = 1;
+    }
+}
+
 // Xử lý sự kiện nhấn chuột để Tích lũy Lượng
 window.addEventListener('mousedown', () => {
     const gameContainer = document.getElementById('game-container');
@@ -127,9 +224,31 @@ window.addEventListener('mousedown', () => {
         leapOverlay ||
         isAnimating) return;
     isHolding = true;
+    
+    // Tốc độ xây cầu tăng theo cấp độ
+    const bridgeSpeed = getBridgeSpeed();
+    
     growInterval = setInterval(() => {
-        bridgeLength += 3;
-        bridge.style.height = bridgeLength + "px";
+        if (bridgeGrowthDirection === 1) {
+            // Tăng chiều dài cầu
+            bridgeLength += bridgeSpeed;
+            bridge.style.height = bridgeLength + "px";
+            
+            // Kiểm tra nếu đạt giới hạn thì đổi hướng
+            if (bridgeLength >= maxBridgeLength) {
+                bridgeGrowthDirection = -1;
+            }
+        } else {
+            // Giảm chiều dài cầu
+            bridgeLength -= bridgeSpeed;
+            if (bridgeLength < 0) bridgeLength = 0;
+            bridge.style.height = bridgeLength + "px";
+            
+            // Nếu về 0 thì đổi hướng lại
+            if (bridgeLength <= 0) {
+                bridgeGrowthDirection = 1;
+            }
+        }
     }, 30);
 });
 
@@ -151,6 +270,7 @@ window.addEventListener('mouseup', () => {
 // Cầu rơi xuống (xoay 90 độ)
 function dropBridge() {
     isAnimating = true;
+    stopPillarMovement(); // Dừng di chuyển cột khi thả cầu
     bridge.style.transform = "rotate(90deg)";
     
     setTimeout(() => {
@@ -164,25 +284,11 @@ function checkLeap() {
     
     // Khoảng cách Điểm nút: từ gap đến (gap + pWidth)
     if (bridgeLength < gap) {
-        // Kiểm tra nếu đang ở Đại học thì thất bại nghiêm trọng
-        if (isInCollege()) {
-            showResult("RỚT ĐẠI HỌC - THÔI HỌC!", "Bạn đã sai lầm tả khuynh ở Đại học! Đây là giai đoạn hình thành chất cao cấp, không cho phép sai lầm. Bạn cần xây dựng lại nền tảng từ đầu. Quay về Lớp 1.");
-            currentLevelNum = 1; // Hell Mode: Về lớp 1
-            currentLevel = 0;
-        } else {
-            showResult("SAI LẦM TẢ KHUYNH", "Bạn quá nôn nóng! Lượng chưa tích lũy đủ đến Điểm Nút đã đòi thực hiện bước nhảy.");
-        }
+        showResult("SAI LẦM TẢ KHUYNH", "Bạn quá nôn nóng! Lượng chưa tích lũy đủ đến Điểm Nút đã đòi thực hiện bước nhảy.");
         isAnimating = false;
     } 
     else if (bridgeLength > (gap + pWidth)) {
-        // Kiểm tra nếu đang ở Đại học thì thất bại nghiêm trọng
-        if (isInCollege()) {
-            showResult("RỚT ĐẠI HỌC - THÔI HỌC!", "Bạn đã sai lầm hữu khuynh ở Đại học! Đây là giai đoạn hình thành chất cao cấp, không cho phép sai lầm. Bạn cần xây dựng lại nền tảng từ đầu. Quay về Lớp 1.");
-            currentLevelNum = 1; // Hell Mode: Về lớp 1
-            currentLevel = 0;
-        } else {
-            showResult("SAI LẦM HỮU KHUYNH", "Bạn quá bảo thủ! Lượng đã thừa nhưng bạn không nắm bắt Điểm Nút để thực hiện bước nhảy đúng lúc.");
-        }
+        showResult("SAI LẦM HỮU KHUYNH", "Bạn quá bảo thủ! Lượng đã thừa nhưng bạn không nắm bắt Điểm Nút để thực hiện bước nhảy đúng lúc.");
         isAnimating = false;
     } 
     else {
@@ -191,30 +297,39 @@ function checkLeap() {
 }
 
 function successLeap() {
-    // Di chuyển người chơi qua cầu
-    const gap = levels[currentLevel].gap;
-    const targetX = playerX + gap + 25; // Di chuyển đến cột tiếp theo
+    // Di chuyển người chơi qua cầu đến cột tiếp theo
+    const nextPillarLeft = parseInt(pillarNext.style.left);
+    const nextPillarWidth = levels[currentLevel].pillarWidth;
+    const targetX = nextPillarLeft + (nextPillarWidth / 2);
     
+    // Animation di chuyển người chơi sang cột tiếp theo
+    player.style.transition = "left 0.8s ease";
     player.style.left = targetX + "px";
     
+    console.log("Player moving to:", targetX + "px");
+    
+    // Ẩn cầu sau khi người chơi đi qua
+    setTimeout(() => {
+        bridge.style.transition = "opacity 0.3s";
+        bridge.style.opacity = "0";
+    }, 400);
+    
+    // Đợi animation player hoàn thành trước khi chuyển màn
     setTimeout(() => {
         currentLevelNum++;
         
         // Kiểm tra checkpoint (Lớp 5, 9, 12) - Kỳ thi chuyển cấp
         if (currentLevelNum == 6) {
-            // Vừa hoàn thành lớp 5
             isAnimating = false;
             startCheckpointQuiz(5);
             return;
         }
         if (currentLevelNum == 10) {
-            // Vừa hoàn thành lớp 9
             isAnimating = false;
             startCheckpointQuiz(9);
             return;
         }
         if (currentLevelNum == 13) {
-            // Vừa hoàn thành lớp 12
             isAnimating = false;
             startCheckpointQuiz(12);
             return;
@@ -235,8 +350,13 @@ function successLeap() {
 
         // Cập nhật chương hiện tại
         const newChapter = getCurrentChapter();
-        if (newChapter !== currentChapter) {
+        const isChapterChange = (newChapter !== currentChapter);
+        if (isChapterChange) {
             currentChapter = newChapter;
+            // Reset tốc độ tăng khi chuyển Giai đoạn (màn mới)
+            deathCount = 0;
+            lastDeathLevel = 0;
+            console.log("🎉 CHUYỂN GIẢI ĐOẠN - Reset tốc độ tăng!");
         }
         
         // Tăng độ khó sau mỗi cấp
@@ -245,33 +365,82 @@ function successLeap() {
             updateQuality();
         }
         
-        // Chuyển cảnh: Cột tiếp theo trở thành cột hiện tại
-        moveToNextPillar();
-    }, 800);
+        // RESET vị trí khi chuyển giai đoạn, KHÔNG reset khi chuyển màn thường
+        if (isChapterChange) {
+            resetPositionOnly();
+        } else {
+            // Chuyển cảnh bình thường: Cột tiếp theo trở thành cột hiện tại
+            moveToNextPillar();
+        }
+    }, 900); // Tăng thời gian để player kịp di chuyển
 }
 
 function moveToNextPillar() {
-    const gap = levels[currentLevel].gap;
+    // Lưu cột hiện tại vào danh sách cột đã qua
+    const currentLeft = parseInt(pillarCurrent.style.left) || 0;
+    const currentWidth = parseInt(pillarCurrent.style.width) || 100;
     
-    // Cập nhật vị trí
-    playerX = playerX + gap + levels[currentLevel - 1].pillarWidth/2;
-    currentPillarX = currentPillarX + gap + levels[currentLevel - 1].pillarWidth;
+    passedPillars.push({
+        left: currentLeft,
+        width: currentWidth
+    });
     
-    // Di chuyển các cột sang trái (tạo hiệu ứng camera theo người chơi)
-    pillarCurrent.style.left = "0px";
-    pillarCurrent.style.width = levels[currentLevel].pillarWidth + "px";
+    // Giới hạn số cột hiển thị (giữ 10 cột)
+    if (passedPillars.length > 10) {
+        passedPillars.shift();
+    }
     
-    // Reset người chơi về vị trí giữa cột mới
-    const currentWidth = levels[currentLevel].pillarWidth;
-    player.style.left = (currentWidth / 2) + "px";
-    playerX = currentWidth / 2;
-    currentPillarX = 0;
+    // KHÔNG render passed pillars vì container không tồn tại
+    // renderPassedPillars();
     
-    // Cột tiếp theo xuất hiện với hiệu ứng
-    pillarNext.classList.add('pillar-appear');
-    setTimeout(() => pillarNext.classList.remove('pillar-appear'), 500);
+    // Dùng VỊ TRÍ BAN ĐẦU, KHÔNG PHẢI VỊ TRÍ SAU KHI DI CHUYỂN
+    const nextLeft = initialNextPillarLeft;
+    const nextWidth = parseInt(pillarNext.style.width);
     
-    nextTurn();
+    pillarCurrent.style.transition = "none";
+    pillarCurrent.style.left = nextLeft + "px";
+    pillarCurrent.style.width = nextWidth + "px";
+    
+    // Cầu xuất hiện tại vị trí bên phải cột current (nơi player đang đứng)
+    const bridgeEl = document.getElementById('bridge');
+    bridgeEl.style.transition = "none";
+    bridgeEl.style.height = "0px";
+    bridgeEl.style.transform = "rotate(0deg)";
+    bridgeEl.style.left = (nextLeft + nextWidth) + "px";
+    bridgeEl.style.bottom = "200px";
+    bridgeEl.style.opacity = "1";
+    bridgeEl.style.visibility = "visible";
+    
+    console.log("Moved - Current pillar at:", nextLeft + "px", "Bridge at:", (nextLeft + nextWidth) + "px");
+    
+    // Bật lại transition
+    setTimeout(() => {
+        pillarCurrent.style.transition = "all 0.8s ease";
+        pillarNext.style.transition = "all 0.8s ease";
+        bridgeEl.style.transition = "transform 0.5s ease";
+        
+        // Gọi nextTurn để tạo cột mới
+        nextTurn();
+    }, 50);
+}
+
+// Render các cột đã qua
+function renderPassedPillars() {
+    const container = document.getElementById('passed-pillars');
+    if (!container) {
+        console.warn('passed-pillars container not found');
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    passedPillars.forEach((pillar, index) => {
+        const pillarEl = document.createElement('div');
+        pillarEl.className = 'passed-pillar';
+        pillarEl.style.left = pillar.left + 'px';
+        pillarEl.style.width = pillar.width + 'px';
+        container.appendChild(pillarEl);
+    });
 }
 
 function updateQuality() {
@@ -283,36 +452,60 @@ function updateQuality() {
     
     // Cảnh báo nếu đang ở Đại học
     if (isInCollege()) {
-        document.getElementById('instruction').innerText = "⚠️ ĐẠI HỌC: SAI 1 LẦN = THÔI HỌC! Nhấn giữ chuột cẩn thận!";
+        const deathInfo = deathCount > 0 ? ` | Chết: ${deathCount} lần` : "";
+        document.getElementById('instruction').innerText = `⚠️ ĐẠI HỌC: KHÓ GẤP ĐÔI! Nhấn giữ chuột cẩn thận!${deathInfo}`;
         document.getElementById('instruction').style.color = "red";
         document.getElementById('instruction').style.fontWeight = "bold";
+    } else if (deathCount > 0) {
+        document.getElementById('instruction').innerText = `Nhấn giữ chuột để tích lũy LƯỢNG (Chết: ${deathCount} lần - Tốc độ +${deathCount * 2})`;
+        document.getElementById('instruction').style.color = "orange";
+        document.getElementById('instruction').style.fontWeight = "bold";
+    } else {
+        document.getElementById('instruction').innerText = "Nhấn giữ chuột để tích lũy LƯỢNG (độ dài cầu)";
+        document.getElementById('instruction').style.color = "black";
+        document.getElementById('instruction').style.fontWeight = "normal";
     }
 }
 
 function nextTurn() {
+    // Reset biến cầu
     bridgeLength = 0;
-    bridge.style.height = "0px";
-    bridge.style.transform = "rotate(0deg)";
-    bridge.style.left = pillarCurrent.style.width || "100px";
-    bridge.style.bottom = "200px";
+    bridgeGrowthDirection = 1;
     
-    // Ngẫu nhiên khoảng cách để thể hiện tính khách quan của hoàn cảnh
+    // Ngẫu nhiên khoảng cách
     const baseGap = levels[currentLevel].gap;
-    const randomVariation = Math.floor(Math.random() * 40) - 20; // -20 đến +20
+    const randomVariation = Math.floor(Math.random() * 40) - 20;
     const newGap = baseGap + randomVariation;
+    levels[currentLevel].gap = Math.max(80, newGap);
     
-    levels[currentLevel].gap = Math.max(80, newGap); // Tối thiểu 80px
-    
+    // Đặt vị trí cột tiếp theo: cách theo gap của level
+    const currentPillarLeft = parseInt(pillarCurrent.style.left) || 0;
     const currentWidth = parseInt(pillarCurrent.style.width) || 100;
-    pillarNext.style.left = (currentWidth + levels[currentLevel].gap) + "px";
+    const nextPillarLeft = currentPillarLeft + currentWidth + levels[currentLevel].gap;
+    
+    // LƯU VỊ TRÍ BAN ĐẦU TRƯỚC KHI DI CHUYỂN
+    initialNextPillarLeft = nextPillarLeft;
+    
+    pillarNext.style.left = nextPillarLeft + "px";
     pillarNext.style.width = levels[currentLevel].pillarWidth + "px";
     
+    console.log("Next pillar INITIAL at:", nextPillarLeft + "px", "Current pillar at:", currentPillarLeft + "px", "Gap:", levels[currentLevel].gap);
+    
     isAnimating = false;
+    
+    // Bắt đầu di chuyển cột nếu cần
+    startPillarMovement();
 }
 
 function showResult(title, desc) {
     document.getElementById('msg-title').innerText = title;
     document.getElementById('msg-desc').innerText = desc;
+    
+    // RESET button về handleRetry() (phòng trường hợp bị override từ showTransitionScreen)
+    const button = msgOverlay.querySelector('button');
+    button.innerText = "Thử lại (Rút kinh nghiệm)";
+    button.onclick = function() { handleRetry(); };
+    
     msgOverlay.classList.remove('hidden');
 }
 
@@ -338,6 +531,89 @@ function showTransitionScreen(title, desc) {
     };
 }
 
+// Xử lý khi người chơi thử lại sau khi thất bại
+function handleRetry() {
+    msgOverlay.classList.add('hidden');
+    
+    console.log(`DEBUG: currentLevelNum trước khi tính checkpoint: ${currentLevelNum}`);
+    
+    // Tìm checkpoint gần nhất (về đầu giai đoạn)
+    let checkpointLevel;
+    if (currentLevelNum <= 5) {
+        checkpointLevel = 1; // Tiểu học → Lớp 1
+    } else if (currentLevelNum <= 9) {
+        checkpointLevel = 6; // THCS → Lớp 6
+    } else if (currentLevelNum <= 12) {
+        checkpointLevel = 10; // THPT → Lớp 10
+    } else {
+        checkpointLevel = 13; // Đại học → Năm 1
+    }
+    
+    console.log(`DEBUG: Checkpoint được tính: ${checkpointLevel}`);
+    
+    // Nếu chết ở màn mới hoặc về checkpoint khác, reset deathCount
+    if (lastDeathLevel !== checkpointLevel) {
+        deathCount = 0;
+        lastDeathLevel = checkpointLevel;
+    }
+    
+    // Tăng số lần chết
+    deathCount++;
+    
+    // Cập nhật level về checkpoint
+    currentLevelNum = checkpointLevel;
+    currentLevel = currentLevelNum - 1;
+    
+    // Hiển thị thông báo
+    const difficultyMsg = deathCount === 1 ? "" : ` (Độ khó tăng: +${(deathCount - 1) * 2})`;
+    console.log(`🔁 VỀ CHECKPOINT Lớp ${checkpointLevel} - Lần ${deathCount}${difficultyMsg}`);
+    
+    // Cập nhật score display
+    scoreDisplay.innerText = currentLevelNum + " / 16";
+    
+    // Cập nhật UI và chơi lại màn hiện tại
+    updateQuality();
+    replayCurrentLevel();
+}
+
+// Chơi lại màn hiện tại (không reset level)
+function replayCurrentLevel() {
+    bridgeLength = 0;
+    const currentWidth = levels[currentLevel].pillarWidth;
+    isAnimating = false;
+    
+    // Reset vị trí về đầu màn
+    pillarCurrent.style.transition = "none";
+    pillarNext.style.transition = "none";
+    player.style.transition = "none";
+    bridge.style.transition = "none";
+    
+    // Reset cột về vị trí đầu (50px)
+    pillarCurrent.style.left = "50px";
+    pillarCurrent.style.width = currentWidth + "px";
+    
+    // Reset vị trí player
+    player.style.left = (50 + currentWidth / 2) + "px";
+    
+    // Reset cầu
+    bridge.style.height = "0px";
+    bridge.style.transform = "rotate(0deg)";
+    bridge.style.left = (50 + currentWidth) + "px";
+    bridge.style.opacity = "1";
+    
+    console.log("🔁 CHƠI LẠI màn", currentLevelNum);
+    
+    // Bật lại transition
+    setTimeout(() => {
+        pillarCurrent.style.transition = "all 0.8s ease";
+        pillarNext.style.transition = "all 0.8s ease";
+        player.style.transition = "all 0.5s";
+        bridge.style.transition = "transform 0.5s ease";
+        
+        nextTurn();
+    }, 50);
+}
+
 function resetGame() {
     currentLevelNum = 1;
     currentLevel = 0;
@@ -350,18 +626,89 @@ function resetGame() {
     scoreDisplay.innerText = "1 / 16";
     msgOverlay.classList.add('hidden');
     
-    // Reset vị trí
+    // Xóa các cột đã qua
+    passedPillars = [];
+    renderPassedPillars();
+    
+    // Reset tất cả về vị trí ban đầu khi chết
+    pillarCurrent.style.transition = "none";
+    pillarNext.style.transition = "none";
+    player.style.transition = "none";
+    bridge.style.transition = "none";
+    
+    // Reset cột về vị trí đầu
+    pillarCurrent.style.left = "0px";
+    pillarCurrent.style.width = initialWidth + "px";
+    
+    // Reset vị trí player
     player.style.left = (initialWidth / 2) + "px";
-    bridge.style.transform = "rotate(0deg)";
+    
+    // Reset cầu
     bridge.style.height = "0px";
+    bridge.style.transform = "rotate(0deg)";
+    bridge.style.left = initialWidth + "px";
+    bridge.style.opacity = "1";
     
     // Reset hướng dẫn
     document.getElementById('instruction').innerText = "Nhấn giữ chuột để tích lũy LƯỢNG (độ dài cầu)";
     document.getElementById('instruction').style.color = "black";
     document.getElementById('instruction').style.fontWeight = "normal";
     
-    updateQuality();
-    nextTurn();
+    // Bật lại transition
+    setTimeout(() => {
+        pillarCurrent.style.transition = "all 0.8s ease";
+        pillarNext.style.transition = "all 0.8s ease";
+        player.style.transition = "all 0.5s";
+        bridge.style.transition = "transform 0.5s ease";
+        
+        updateQuality();
+        nextTurn();
+    }, 50);
+}
+
+// Reset vị trí về đầu khi chuyển giai đoạn (GIỮ LEVEL HIỆN TẠI)
+function resetPositionOnly() {
+    bridgeLength = 0;
+    const currentWidth = levels[currentLevel].pillarWidth;
+    isAnimating = false;
+    
+    // Reset số lần chết khi chuyển giai đoạn
+    deathCount = 0;
+    lastDeathLevel = 0;
+    
+    // Xóa các cột đã qua
+    passedPillars = [];
+    
+    // Reset tất cả về vị trí ban đầu
+    pillarCurrent.style.transition = "none";
+    pillarNext.style.transition = "none";
+    player.style.transition = "none";
+    bridge.style.transition = "none";
+    
+    // Reset cột về vị trí đầu (50px)
+    pillarCurrent.style.left = "50px";
+    pillarCurrent.style.width = currentWidth + "px";
+    
+    // Reset vị trí player
+    player.style.left = (50 + currentWidth / 2) + "px";
+    
+    // Reset cầu
+    bridge.style.height = "0px";
+    bridge.style.transform = "rotate(0deg)";
+    bridge.style.left = (50 + currentWidth) + "px";
+    bridge.style.opacity = "1";
+    
+    console.log("🔄 RESET vị trí về đầu - Chuyển giai đoạn!");
+    
+    // Bật lại transition
+    setTimeout(() => {
+        pillarCurrent.style.transition = "all 0.8s ease";
+        pillarNext.style.transition = "all 0.8s ease";
+        player.style.transition = "all 0.5s";
+        bridge.style.transition = "transform 0.5s ease";
+        
+        nextTurn();
+    }, 50);
 }
 
 function returnToMenu() {
@@ -499,12 +846,19 @@ function finishQuiz() {
         showLeapComplete();
     } else {
         // Trượt - Quay về checkpoint trước
+        currentLevelNum = config.failTo;
+        currentLevel = currentLevelNum - 1;
+        deathCount = 0; // Reset số lần chết
+        lastDeathLevel = 0;
+        
+        console.log(`❌ FAIL QUIZ Lớp ${checkpointLevel} → Quay về Lớp ${config.failTo}`);
+        
         showResult(
             `RỚT KỲ THI LỚP ${checkpointLevel}!`,
             `Bạn chỉ trả lời đúng ${correctAnswers}/${currentQuizQuestions.length} câu. Chưa đủ lượng để thực hiện bước nhảy! Quay về Lớp ${config.failTo}.`
         );
-        currentLevelNum = config.failTo;
-        currentLevel = currentLevelNum - 1;
+        
+        // Đợi người dùng click "Thử lại" thì sẽ reset vị trí trong handleRetry()
     }
 }
 
@@ -533,8 +887,15 @@ function continueGame() {
     scoreDisplay.innerText = currentLevelNum + " / 16";
     currentLevel = currentLevelNum - 1;
     currentChapter = getCurrentChapter();
+    
+    // Reset số lần chết khi qua checkpoint (chuyển giai đoạn)
+    deathCount = 0;
+    lastDeathLevel = 0;
+    
     updateQuality();
-    moveToNextPillar();
+    
+    // RESET vị trí về đầu sau khi qua checkpoint (chuyển giai đoạn)
+    resetPositionOnly();
 }
 
 // Không tự động khởi tạo game khi load trang
