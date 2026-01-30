@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dialectical Bridge - Triết học 4.0</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <!-- Main Menu Screen -->
+    <div id="main-menu">
+        <div class="menu-content">
+            <h1 class="game-title">🌉 The Dialectical Bridge</h1>
+            <h2 class="game-subtitle">Triết học 4.0</h2>
+            <p class="game-description">Hành trình từ Tiểu học đến Đại học</p>
+            <button id="start-button" onclick="startGame()">START</button>
+            <div class="game-info">
+                <p>🎯 16 cấp độ thử thách</p>
+                <p>📚 Tích lũy LƯỢNG để thực hiện bước nhảy CHẤT</p>
+                <p>⚠️ Cẩn thận với Điểm Nút!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <div id="ui-layer">
+            <h2 id="level-name">Tiểu Học Cơ Sở - Lớp 1</h2>
+            <p id="instruction">Nhấn giữ chuột để tích lũy LƯỢNG (độ dài cầu)</p>
+            <div id="score-board">Cấp độ: <span id="score">1 / 16</span></div>
+        </div>
+
+        <div id="world">
+            <!-- Các cột nền để tạo chiều sâu -->
+            <div id="bg-pillars">
+                <div class="bg-pillar" style="left: 30%; height: 150px; width: 60px;"></div>
+                <div class="bg-pillar" style="left: 50%; height: 180px; width: 50px;"></div>
+                <div class="bg-pillar" style="left: 70%; height: 140px; width: 55px;"></div>
+                <div class="bg-pillar" style="left: 85%; height: 160px; width: 45px;"></div>
+            </div>
+            <div id="player">👶</div>
+            <div id="bridge"></div>
+            <div id="pillar-container">
+                <div id="pillar-current" class="pillar"></div>
+                <div id="pillar-next" class="pillar"></div>
+            </div>
+        </div>
+
+        <div id="message-overlay" class="hidden">
+            <div class="message-content">
+                <h1 id="msg-title"></h1>
+                <p id="msg-desc"></p>
+                <button onclick="resetGame()">Thử lại (Rút kinh nghiệm)</button>
+            </div>
+        </div>
+
+        <!-- Quiz Overlay for Checkpoint -->
+        <div id="quiz-overlay" class="hidden">
+            <div class="quiz-content">
+                <h2 id="quiz-title">KỲ thi Chuyển cấp</h2>
+                <div id="quiz-timer">⏱️ Thời gian: <span id="time-left">0</span>s</div>
+                <div id="quiz-progress">Câu <span id="current-question">1</span> / <span id="total-questions">0</span></div>
+                <div id="question-container">
+                    <p id="question-text"></p>
+                    <div id="answers-container"></div>
+                </div>
+                <button id="submit-answer" onclick="submitAnswer()" disabled>Tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

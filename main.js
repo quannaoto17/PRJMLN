@@ -1,0 +1,540 @@
+const bridge = document.getElementById('bridge');
+const player = document.getElementById('player');
+const pillarCurrent = document.getElementById('pillar-current');
+const pillarNext = document.getElementById('pillar-next');
+const msgOverlay = document.getElementById('message-overlay');
+const levelName = document.getElementById('level-name');
+const scoreDisplay = document.getElementById('score');
+const quizOverlay = document.getElementById('quiz-overlay');
+
+let currentLevelNum = 1; // Cấp độ từ 1-16
+let bridgeLength = 0;
+let isHolding = false;
+let growInterval;
+const initialWidth = 100; // Chiều rộng cột đầu tiên
+let playerX = initialWidth / 2; // Vị trí X của người chơi ở giữa cột
+let currentPillarX = 0; // Vị trí cột hiện tại
+let isAnimating = false; // Ngăn spam click
+let collegeFailAllowed = false; // Khi vào Đại học, không cho phép sai
+
+// Cấu trúc chương học
+const chapters = [
+    { name: "Tiểu Học Cơ Sở", start: 1, end: 5 },
+    { name: "Trung Học Cơ Sở", start: 6, end: 9 },
+    { name: "Trung Học Phổ Thông", start: 10, end: 12 },
+    { name: "Đại Học", start: 13, end: 16 }
+];
+
+// Cấu hình các cấp độ (Sự phát triển của Chất) - 16 cấp độ
+const levels = [
+    // Lớp 1-5: Tiểu Học Cơ Sở - Chất đơn giản
+    { name: "Lớp 1", icon: "👶", pillarWidth: 100, gap: 100 },
+    { name: "Lớp 2", icon: "👶", pillarWidth: 95, gap: 110 },
+    { name: "Lớp 3", icon: "👶", pillarWidth: 90, gap: 120 },
+    { name: "Lớp 4", icon: "👶", pillarWidth: 85, gap: 130 },
+    { name: "Lớp 5", icon: "👶", pillarWidth: 80, gap: 140 },
+    
+    // Lớp 6-9: Trung Học Cơ Sở - Chất đang hình thành
+    { name: "Lớp 6", icon: "👦", pillarWidth: 75, gap: 150 },
+    { name: "Lớp 7", icon: "👦", pillarWidth: 70, gap: 160 },
+    { name: "Lớp 8", icon: "👦", pillarWidth: 65, gap: 170 },
+    { name: "Lớp 9", icon: "👦", pillarWidth: 60, gap: 180 },
+    
+    // Lớp 10-12: Trung Học Phổ Thông - Chất tiệm cận sự trưởng thành
+    { name: "Lớp 10", icon: "🧑‍🎓", pillarWidth: 55, gap: 190 },
+    { name: "Lớp 11", icon: "🧑‍🎓", pillarWidth: 50, gap: 200 },
+    { name: "Lớp 12", icon: "🧑‍🎓", pillarWidth: 45, gap: 220 },
+    
+    // Đại Học (Hell Mode) - Chất cao cấp, yêu cầu sự tự giác tuyệt đối
+    { name: "Năm 1", icon: "🎓", pillarWidth: 40, gap: 240 },
+    { name: "Năm 2", icon: "🎓", pillarWidth: 35, gap: 260 },
+    { name: "Năm 3", icon: "🎓", pillarWidth: 30, gap: 280 },
+    { name: "Năm 4", icon: "🎓", pillarWidth: 25, gap: 300 }
+];
+
+let currentLevel = 0;
+let currentChapter = 0;
+
+// Ngân hàng câu hỏi (30 câu)
+const questionBank = [
+    // Nhóm dễ - Định nghĩa (10 câu)
+    { q: "Vật chất là gì?", a: ["Thực tại khách quan tồn tại độc lập với ý thức", "Sản phẩm của ý thức con người", "Chỉ là ảo giác", "Thứ do con người tạo ra"], correct: 0, difficulty: "easy" },
+    { q: "Ý thức là gì?", a: ["Sự phản ánh hiện thực khách quan vào đầu óc con người", "Một dạng vật chất", "Tồn tại độc lập với não bộ", "Không liên quan đến thực tiễn"], correct: 0, difficulty: "easy" },
+    { q: "Độ là gì?", a: ["Giới hạn định lượng mà trong đó sự vật còn giữ được tính Chất", "Giới hạn tối đa của sự vật", "Giới hạn tối thiểu", "Không có giới hạn"], correct: 0, difficulty: "easy" },
+    { q: "Điểm nút là gì?", a: ["Thời điểm chín muồi để thực hiện bước nhảy từ Chất cũ sang Chất mới", "Điểm kết thúc quá trình", "Điểm bắt đầu tích lũy", "Không có ý nghĩa gì"], correct: 0, difficulty: "easy" },
+    { q: "Lượng là gì?", a: ["Quy định về mặt số lượng, quy mô, tốc độ phát triển", "Chỉ là con số", "Tính chất bên ngoài", "Không thay đổi được"], correct: 0, difficulty: "easy" },
+    { q: "Chất là gì?", a: ["Tính quy định làm cho sự vật là nó chứ không phải cái khác", "Chỉ là hình thức bên ngoài", "Giống nhau ở mọi sự vật", "Không thể nhận biết được"], correct: 0, difficulty: "easy" },
+    { q: "Bước nhảy là gì?", a: ["Sự chuyển biến từ Chất cũ sang Chất mới", "Sự thay đổi về lượng", "Sự lặp lại cũ", "Chỉ là thay đổi hình thức"], correct: 0, difficulty: "easy" },
+    { q: "Quy luật chuyển hóa từ lượng sang chất nói về điều gì?", a: ["Sự tích lũy về lượng dẫn đến thay đổi về chất", "Chất không bao giờ thay đổi", "Lượng không quan trọng", "Chỉ có lượng là quan trọng"], correct: 0, difficulty: "easy" },
+    { q: "Tả khuynh là gì?", a: ["Nôn nóng, chủ quan duy ý chí", "Thận trọng quá mức", "Hành động đúng đắn", "Không làm gì cả"], correct: 0, difficulty: "easy" },
+    { q: "Hữu khuynh là gì?", a: ["Bảo thủ, trì trệ, bỏ lỡ thời cơ", "Hành động nhanh chóng", "Quyết đoán đúng lúc", "Thay đổi liên tục"], correct: 0, difficulty: "easy" },
+    
+    // Nhóm trung bình - Mối quan hệ (10 câu)
+    { q: "Lượng đổi dẫn đến điều gì?", a: ["Chất đổi khi đạt đến Điểm nút", "Không có gì thay đổi", "Chỉ lượng tăng lên", "Mọi thứ bất biến"], correct: 0, difficulty: "medium" },
+    { q: "Chất mới ra đời có nghĩa là gì?", a: ["Bước nhảy đã hoàn thành, sự vật có tính quy định mới", "Chỉ thay đổi hình thức", "Quay về trạng thái cũ", "Không có gì đặc biệt"], correct: 0, difficulty: "medium" },
+    { q: "Tại sao phải tích lũy đủ lượng?", a: ["Vì chưa đủ lượng thì không thể thực hiện bước nhảy", "Để tốn thời gian", "Không cần thiết", "Chỉ cần ý chí"], correct: 0, difficulty: "medium" },
+    { q: "Điều gì xảy ra nếu bỏ lỡ Điểm nút?", a: ["Thời cơ qua đi, khó thực hiện bước nhảy", "Không sao cả", "Dễ dàng thực hiện sau", "Luôn có cơ hội khác"], correct: 0, difficulty: "medium" },
+    { q: "Quan hệ giữa Lượng và Chất như thế nào?", a: ["Thống nhất biện chứng, lượng đổi dẫn đến chất đổi", "Hoàn toàn độc lập", "Chỉ có lượng quan trọng", "Chỉ có chất quan trọng"], correct: 0, difficulty: "medium" },
+    { q: "Tại sao Đại học không cho phép sai lầm?", a: ["Giai đoạn hình thành chất cao cấp, yêu cầu tự giác tuyệt đối", "Do quy định của nhà trường", "Vì quá dễ", "Không có lý do"], correct: 0, difficulty: "medium" },
+    { q: "Phủ định của phủ định là gì?", a: ["Quay lại điểm xuất phát ở trình độ cao hơn", "Quay lại hoàn toàn như cũ", "Phá hủy mọi thứ", "Dừng lại không phát triển"], correct: 0, difficulty: "medium" },
+    { q: "Tại sao cần nắm bắt Điểm nút?", a: ["Để thực hiện bước nhảy đúng lúc, thành công", "Không cần thiết", "Chỉ là lý thuyết", "Tùy hứng"], correct: 0, difficulty: "medium" },
+    { q: "Thất bại ở Đại học có ý nghĩa gì?", a: ["Khủng hoảng bản sắc, cần xây dựng lại từ đầu", "Chỉ thử lại ngay", "Không ảnh hưởng gì", "Dễ dàng khắc phục"], correct: 0, difficulty: "medium" },
+    { q: "Quá trình học vấn thể hiện quy luật gì?", a: ["Lượng đổi thành chất đổi qua các cấp học", "Không có quy luật", "Hoàn toàn ngẫu nhiên", "Chỉ phụ thuộc vận may"], correct: 0, difficulty: "medium" },
+    
+    // Nhóm khó - Vận dụng (10 câu)
+    { q: "Doanh nghiệp tăng vốn nhưng không đổi mới công nghệ. Đây là sai lầm gì?", a: ["Hữu khuynh - Chỉ tăng lượng mà không tạo bước nhảy về chất", "Tả khuynh", "Hoàn toàn đúng", "Không có vấn đề"], correct: 0, difficulty: "hard" },
+    { q: "Sinh viên tích lũy 140 tín chỉ nhưng không làm thủ tục tốt nghiệp vì sợ đi làm. Sai lầm gì?", a: ["Hữu khuynh - Trì trệ trước Điểm nút", "Tả khuynh", "Quyết định đúng đắn", "Cần thêm thời gian"], correct: 0, difficulty: "hard" },
+    { q: "Khởi nghiệp khi chưa có kiến thức, kinh nghiệm là sai lầm gì?", a: ["Tả khuynh - Nôn nóng, chủ quan duy ý chí", "Hữu khuynh", "Dũng cảm đáng khích lệ", "Cách làm hay"], correct: 0, difficulty: "hard" },
+    { q: "Học lớp 12 nhưng không thi Đại học vì sợ khó là sai lầm gì?", a: ["Hữu khuynh - Bỏ lỡ Điểm nút chuyển biến", "Tả khuynh", "Lựa chọn hợp lý", "Không sao"], correct: 0, difficulty: "hard" },
+    { q: "Công ty mở rộng quá nhanh khi chưa vững về quản lý là sai lầm gì?", a: ["Tả khuynh - Lượng chưa đủ đã đòi bước nhảy", "Hữu khuynh", "Chiến lược tốt", "Tầm nhìn xa"], correct: 0, difficulty: "hard" },
+    { q: "Nước ta đổi mới kinh tế 1986 sau nhiều năm bế tắc là ví dụ về điều gì?", a: ["Nắm bắt Điểm nút để thực hiện bước nhảy", "Tả khuynh", "Hữu khuynh", "Ngẫu nhiên may mắn"], correct: 0, difficulty: "hard" },
+    { q: "Học sinh lớp 5 thi vào lớp 10 luôn là sai lầm gì?", a: ["Tả khuynh - Bỏ qua giai đoạn tích lũy cần thiết", "Hữu khuynh", "Thông minh vượt trội", "Cách học mới"], correct: 0, difficulty: "hard" },
+    { q: "Doanh nghiệp có lợi nhuận tốt nhưng không mở rộng vì sợ rủi ro là gì?", a: ["Hữu khuynh - Bỏ lỡ cơ hội phát triển", "Tả khuynh", "Thận trọng đúng đắn", "An toàn tốt nhất"], correct: 0, difficulty: "hard" },
+    { q: "Cách mạng công nghiệp 4.0 yêu cầu doanh nghiệp phải làm gì?", a: ["Chuyển đổi số - Thực hiện bước nhảy về chất", "Giữ nguyên như cũ", "Chỉ tăng vốn", "Đợi người khác làm trước"], correct: 0, difficulty: "hard" },
+    { q: "Học đến đâu biết đến đó, không cần bằng cấp là quan điểm gì?", a: ["Hữu khuynh - Phủ nhận vai trò của bước nhảy về chất", "Tả khuynh", "Tiến bộ hiện đại", "Hoàn toàn đúng"], correct: 0, difficulty: "hard" }
+];
+
+// Biến quiz
+let quizTimer = null;
+let timeLeft = 0;
+let currentQuizQuestions = [];
+let currentQuestionIndex = 0;
+let correctAnswers = 0;
+let selectedAnswer = null;
+let checkpointLevel = 0; // Checkpoint nào đang làm bài (5, 9, 12)
+
+function getCurrentChapter() {
+    for (let i = 0; i < chapters.length; i++) {
+        if (currentLevelNum >= chapters[i].start && currentLevelNum <= chapters[i].end) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+function isInCollege() {
+    return currentLevelNum >= 13;
+}
+
+// Xử lý sự kiện nhấn chuột để Tích lũy Lượng
+window.addEventListener('mousedown', () => {
+    const gameContainer = document.getElementById('game-container');
+    const leapOverlay = document.getElementById('leap-complete-overlay');
+    // Ngăn click khi có bất kỳ overlay nào đang hiển thị
+    if (gameContainer.classList.contains('hidden') || 
+        !msgOverlay.classList.contains('hidden') || 
+        !quizOverlay.classList.contains('hidden') ||
+        leapOverlay ||
+        isAnimating) return;
+    isHolding = true;
+    growInterval = setInterval(() => {
+        bridgeLength += 3;
+        bridge.style.height = bridgeLength + "px";
+    }, 30);
+});
+
+// Xử lý sự kiện thả chuột để thực hiện Bước nhảy (cầu rơi xuống)
+window.addEventListener('mouseup', () => {
+    const gameContainer = document.getElementById('game-container');
+    const leapOverlay = document.getElementById('leap-complete-overlay');
+    // Ngăn click khi có bất kỳ overlay nào đang hiển thị
+    if (gameContainer.classList.contains('hidden') || 
+        !quizOverlay.classList.contains('hidden') ||
+        leapOverlay ||
+        !isHolding || 
+        isAnimating) return;
+    isHolding = false;
+    clearInterval(growInterval);
+    dropBridge();
+});
+
+// Cầu rơi xuống (xoay 90 độ)
+function dropBridge() {
+    isAnimating = true;
+    bridge.style.transform = "rotate(90deg)";
+    
+    setTimeout(() => {
+        checkLeap();
+    }, 500);
+}
+
+function checkLeap() {
+    const gap = levels[currentLevel].gap;
+    const pWidth = levels[currentLevel].pillarWidth;
+    
+    // Khoảng cách Điểm nút: từ gap đến (gap + pWidth)
+    if (bridgeLength < gap) {
+        // Kiểm tra nếu đang ở Đại học thì thất bại nghiêm trọng
+        if (isInCollege()) {
+            showResult("RỚT ĐẠI HỌC - THÔI HỌC!", "Bạn đã sai lầm tả khuynh ở Đại học! Đây là giai đoạn hình thành chất cao cấp, không cho phép sai lầm. Bạn cần xây dựng lại nền tảng từ đầu. Quay về Lớp 1.");
+            currentLevelNum = 1; // Hell Mode: Về lớp 1
+            currentLevel = 0;
+        } else {
+            showResult("SAI LẦM TẢ KHUYNH", "Bạn quá nôn nóng! Lượng chưa tích lũy đủ đến Điểm Nút đã đòi thực hiện bước nhảy.");
+        }
+        isAnimating = false;
+    } 
+    else if (bridgeLength > (gap + pWidth)) {
+        // Kiểm tra nếu đang ở Đại học thì thất bại nghiêm trọng
+        if (isInCollege()) {
+            showResult("RỚT ĐẠI HỌC - THÔI HỌC!", "Bạn đã sai lầm hữu khuynh ở Đại học! Đây là giai đoạn hình thành chất cao cấp, không cho phép sai lầm. Bạn cần xây dựng lại nền tảng từ đầu. Quay về Lớp 1.");
+            currentLevelNum = 1; // Hell Mode: Về lớp 1
+            currentLevel = 0;
+        } else {
+            showResult("SAI LẦM HỮU KHUYNH", "Bạn quá bảo thủ! Lượng đã thừa nhưng bạn không nắm bắt Điểm Nút để thực hiện bước nhảy đúng lúc.");
+        }
+        isAnimating = false;
+    } 
+    else {
+        successLeap();
+    }
+}
+
+function successLeap() {
+    // Di chuyển người chơi qua cầu
+    const gap = levels[currentLevel].gap;
+    const targetX = playerX + gap + 25; // Di chuyển đến cột tiếp theo
+    
+    player.style.left = targetX + "px";
+    
+    setTimeout(() => {
+        currentLevelNum++;
+        
+        // Kiểm tra checkpoint (Lớp 5, 9, 12) - Kỳ thi chuyển cấp
+        if (currentLevelNum == 6) {
+            // Vừa hoàn thành lớp 5
+            isAnimating = false;
+            startCheckpointQuiz(5);
+            return;
+        }
+        if (currentLevelNum == 10) {
+            // Vừa hoàn thành lớp 9
+            isAnimating = false;
+            startCheckpointQuiz(9);
+            return;
+        }
+        if (currentLevelNum == 13) {
+            // Vừa hoàn thành lớp 12
+            isAnimating = false;
+            startCheckpointQuiz(12);
+            return;
+        }
+        
+        // Kiểm tra thắng game (hoàn thành Đại học)
+        if (currentLevelNum > 16) {
+            showResult("TỐT NGHIỆP ĐẠI HỌC!", "Chúc mừng! Bạn đã hoàn thành tất cả 16 cấp độ và tốt nghiệp Đại học với thành tích xuất sắc!");
+            isAnimating = false;
+            return;
+        }
+        
+        scoreDisplay.innerText = currentLevelNum + " / 16";
+        
+        // Hiệu ứng visual cho Bước nhảy thành công
+        document.body.classList.add('leap-success');
+        setTimeout(() => document.body.classList.remove('leap-success'), 1000);
+
+        // Cập nhật chương hiện tại
+        const newChapter = getCurrentChapter();
+        if (newChapter !== currentChapter) {
+            currentChapter = newChapter;
+        }
+        
+        // Tăng độ khó sau mỗi cấp
+        if (currentLevelNum <= levels.length) {
+            currentLevel = currentLevelNum - 1;
+            updateQuality();
+        }
+        
+        // Chuyển cảnh: Cột tiếp theo trở thành cột hiện tại
+        moveToNextPillar();
+    }, 800);
+}
+
+function moveToNextPillar() {
+    const gap = levels[currentLevel].gap;
+    
+    // Cập nhật vị trí
+    playerX = playerX + gap + levels[currentLevel - 1].pillarWidth/2;
+    currentPillarX = currentPillarX + gap + levels[currentLevel - 1].pillarWidth;
+    
+    // Di chuyển các cột sang trái (tạo hiệu ứng camera theo người chơi)
+    pillarCurrent.style.left = "0px";
+    pillarCurrent.style.width = levels[currentLevel].pillarWidth + "px";
+    
+    // Reset người chơi về vị trí giữa cột mới
+    const currentWidth = levels[currentLevel].pillarWidth;
+    player.style.left = (currentWidth / 2) + "px";
+    playerX = currentWidth / 2;
+    currentPillarX = 0;
+    
+    // Cột tiếp theo xuất hiện với hiệu ứng
+    pillarNext.classList.add('pillar-appear');
+    setTimeout(() => pillarNext.classList.remove('pillar-appear'), 500);
+    
+    nextTurn();
+}
+
+function updateQuality() {
+    currentChapter = getCurrentChapter();
+    const chapterName = chapters[currentChapter].name;
+    const levelNameText = levels[currentLevel].name;
+    levelName.innerText = chapterName + " - " + levelNameText;
+    player.innerText = levels[currentLevel].icon;
+    
+    // Cảnh báo nếu đang ở Đại học
+    if (isInCollege()) {
+        document.getElementById('instruction').innerText = "⚠️ ĐẠI HỌC: SAI 1 LẦN = THÔI HỌC! Nhấn giữ chuột cẩn thận!";
+        document.getElementById('instruction').style.color = "red";
+        document.getElementById('instruction').style.fontWeight = "bold";
+    }
+}
+
+function nextTurn() {
+    bridgeLength = 0;
+    bridge.style.height = "0px";
+    bridge.style.transform = "rotate(0deg)";
+    bridge.style.left = pillarCurrent.style.width || "100px";
+    bridge.style.bottom = "200px";
+    
+    // Ngẫu nhiên khoảng cách để thể hiện tính khách quan của hoàn cảnh
+    const baseGap = levels[currentLevel].gap;
+    const randomVariation = Math.floor(Math.random() * 40) - 20; // -20 đến +20
+    const newGap = baseGap + randomVariation;
+    
+    levels[currentLevel].gap = Math.max(80, newGap); // Tối thiểu 80px
+    
+    const currentWidth = parseInt(pillarCurrent.style.width) || 100;
+    pillarNext.style.left = (currentWidth + levels[currentLevel].gap) + "px";
+    pillarNext.style.width = levels[currentLevel].pillarWidth + "px";
+    
+    isAnimating = false;
+}
+
+function showResult(title, desc) {
+    document.getElementById('msg-title').innerText = title;
+    document.getElementById('msg-desc').innerText = desc;
+    msgOverlay.classList.remove('hidden');
+}
+
+function showTransitionScreen(title, desc) {
+    document.getElementById('msg-title').innerText = title;
+    document.getElementById('msg-desc').innerText = desc;
+    msgOverlay.classList.remove('hidden');
+    
+    // Thay nút "Thử lại" bằng "Tiếp tục"
+    const button = msgOverlay.querySelector('button');
+    button.innerText = "Tiếp tục vào Đại Học";
+    button.onclick = function() {
+        msgOverlay.classList.add('hidden');
+        button.innerText = "Thử lại (Rút kinh nghiệm)";
+        button.onclick = function() { resetGame(); };
+        scoreDisplay.innerText = currentLevelNum + " / 16";
+        
+        // Cập nhật chương và level
+        currentLevel = currentLevelNum - 1;
+        currentChapter = getCurrentChapter();
+        updateQuality();
+        moveToNextPillar();
+    };
+}
+
+function resetGame() {
+    currentLevelNum = 1;
+    currentLevel = 0;
+    currentChapter = 0;
+    bridgeLength = 0;
+    const initialWidth = levels[0].pillarWidth;
+    playerX = initialWidth / 2;
+    currentPillarX = 0;
+    isAnimating = false;
+    scoreDisplay.innerText = "1 / 16";
+    msgOverlay.classList.add('hidden');
+    
+    // Reset vị trí
+    player.style.left = (initialWidth / 2) + "px";
+    bridge.style.transform = "rotate(0deg)";
+    bridge.style.height = "0px";
+    
+    // Reset hướng dẫn
+    document.getElementById('instruction').innerText = "Nhấn giữ chuột để tích lũy LƯỢNG (độ dài cầu)";
+    document.getElementById('instruction').style.color = "black";
+    document.getElementById('instruction').style.fontWeight = "normal";
+    
+    updateQuality();
+    nextTurn();
+}
+
+function returnToMenu() {
+    document.getElementById('game-container').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+    resetGame();
+}
+
+// Hàm bắt đầu game từ main menu
+function startGame() {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('game-container').classList.remove('hidden');
+    initGame();
+}
+
+// Khởi tạo game
+function initGame() {
+    updateQuality();
+    nextTurn();
+}
+
+// ===== HỆ THỐNG QUIZ =====
+
+// Bắt đầu quiz checkpoint
+function startCheckpointQuiz(level) {
+    checkpointLevel = level;
+    const config = {
+        5: { questions: 2, time: 14, required: 1 },
+        9: { questions: 4, time: 28, required: 2 },
+        12: { questions: 6, time: 42, required: 3 }
+    }[level];
+    
+    // Chọn câu hỏi ngẫu nhiên
+    currentQuizQuestions = [];
+    const shuffled = [...questionBank].sort(() => Math.random() - 0.5);
+    currentQuizQuestions = shuffled.slice(0, config.questions);
+    
+    currentQuestionIndex = 0;
+    correctAnswers = 0;
+    timeLeft = config.time;
+    
+    document.getElementById('quiz-title').innerText = `Kỳ thi Chuyển cấp - Lớp ${level}`;
+    document.getElementById('total-questions').innerText = config.questions;
+    
+    quizOverlay.classList.remove('hidden');
+    showQuestion();
+    startTimer();
+}
+
+// Hiển thị câu hỏi
+function showQuestion() {
+    const question = currentQuizQuestions[currentQuestionIndex];
+    document.getElementById('current-question').innerText = currentQuestionIndex + 1;
+    document.getElementById('question-text').innerText = question.q;
+    
+    const answersContainer = document.getElementById('answers-container');
+    answersContainer.innerHTML = '';
+    selectedAnswer = null;
+    document.getElementById('submit-answer').disabled = true;
+    
+    question.a.forEach((answer, index) => {
+        const div = document.createElement('div');
+        div.className = 'answer-option';
+        div.innerText = answer;
+        div.onclick = () => selectAnswer(index);
+        answersContainer.appendChild(div);
+    });
+}
+
+// Chọn đáp án
+function selectAnswer(index) {
+    selectedAnswer = index;
+    document.querySelectorAll('.answer-option').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+    });
+    document.getElementById('submit-answer').disabled = false;
+}
+
+// Submit đáp án
+function submitAnswer() {
+    if (selectedAnswer === null) return;
+    
+    const question = currentQuizQuestions[currentQuestionIndex];
+    const isCorrect = selectedAnswer === question.correct;
+    
+    // Hiển thị kết quả
+    document.querySelectorAll('.answer-option').forEach((el, i) => {
+        el.onclick = null;
+        if (i === question.correct) {
+            el.classList.add('correct');
+        } else if (i === selectedAnswer && !isCorrect) {
+            el.classList.add('wrong');
+        }
+    });
+    
+    if (isCorrect) correctAnswers++;
+    
+    // Chuyển câu tiếp theo
+    setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuizQuestions.length) {
+            showQuestion();
+        } else {
+            finishQuiz();
+        }
+    }, 1500);
+}
+
+// Đếm ngược thời gian
+function startTimer() {
+    document.getElementById('time-left').innerText = timeLeft;
+    quizTimer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('time-left').innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(quizTimer);
+            finishQuiz();
+        }
+    }, 1000);
+}
+
+// Kết thúc quiz
+function finishQuiz() {
+    clearInterval(quizTimer);
+    quizOverlay.classList.add('hidden');
+    
+    const config = {
+        5: { required: 1, failTo: 1 },
+        9: { required: 2, failTo: 5 },
+        12: { required: 3, failTo: 9 }
+    }[checkpointLevel];
+    
+    if (correctAnswers >= config.required) {
+        // Đậu - Tiếp tục
+        showLeapComplete();
+    } else {
+        // Trượt - Quay về checkpoint trước
+        showResult(
+            `RỚT KỲ THI LỚP ${checkpointLevel}!`,
+            `Bạn chỉ trả lời đúng ${correctAnswers}/${currentQuizQuestions.length} câu. Chưa đủ lượng để thực hiện bước nhảy! Quay về Lớp ${config.failTo}.`
+        );
+        currentLevelNum = config.failTo;
+        currentLevel = currentLevelNum - 1;
+    }
+}
+
+// Hiệu ứng bước nhảy hoàn thành
+function showLeapComplete() {
+    const overlay = document.createElement('div');
+    overlay.id = 'leap-complete-overlay';
+    overlay.innerHTML = `
+        <div class="leap-complete-content">
+            <h1>🎉 BƯỚC NHẢY HOÀN THÀNH 🎉</h1>
+            <h2>CHẤT MỚI RA ĐỜI</h2>
+            <p>Chúc mừng! Bạn đã vượt qua Lớp ${checkpointLevel}</p>
+            <div class="confetti">✨🎊🎉🎊✨</div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    
+    setTimeout(() => {
+        overlay.remove();
+        continueGame();
+    }, 3000);
+}
+
+// Tiếp tục game sau quiz
+function continueGame() {
+    scoreDisplay.innerText = currentLevelNum + " / 16";
+    currentLevel = currentLevelNum - 1;
+    currentChapter = getCurrentChapter();
+    updateQuality();
+    moveToNextPillar();
+}
+
+// Không tự động khởi tạo game khi load trang
