@@ -34,6 +34,11 @@ let initialNextPillarLeft = 0;
 // Hệ thống độ khó tăng dần khi chết
 let deathCount = 0; // Số lần chết ở màn hiện tại
 let lastDeathLevel = 0; // Level cuối cùng chết
+
+// Hệ thống mạng (lives)
+let lives = 5; // Số mạng còn lại
+const maxLives = 5; // Tối đa 5 mạng mỗi màn
+
 // Cấu trúc chương học
 const chapters = [
     { name: "Tiểu Học Cơ Sở", start: 1, end: 5 },
@@ -160,7 +165,7 @@ function getBridgeSpeed() {
     const deathPenalty = deathCount * 2;
     
     // Nếu ở Đại học, khó GẤP ĐÔI
-    const collegeMultiplier = isInCollege() ? 2 : 1;
+    const collegeMultiplier = isInCollege() ? 1.5 : 1;
     
     return (baseSpeed + deathPenalty) * collegeMultiplier;
 }
@@ -271,6 +276,11 @@ window.addEventListener('mouseup', () => {
 function dropBridge() {
     isAnimating = true;
     stopPillarMovement(); // Dừng di chuyển cột khi thả cầu
+    
+    // Dịch cầu sang trái khi xoay để nằm sát cột
+    const currentLeft = parseInt(bridge.style.left) || 0;
+    const adjustedLeft = currentLeft - 5; // Dịch sang trái 5px (bằng width của cầu)
+    bridge.style.left = adjustedLeft + "px";
     bridge.style.transform = "rotate(90deg)";
     
     setTimeout(() => {
@@ -356,7 +366,10 @@ function successLeap() {
             // Reset tốc độ tăng khi chuyển Giai đoạn (màn mới)
             deathCount = 0;
             lastDeathLevel = 0;
-            console.log("🎉 CHUYỂN GIẢI ĐOẠN - Reset tốc độ tăng!");
+            // Reset mạng khi chuyển màn mới
+            lives = maxLives;
+            updateLivesDisplay();
+            console.log("🎉 CHUYỂN GIAI ĐOẠN - Reset tốc độ tăng và mạng!");
         }
         
         // Tăng độ khó sau mỗi cấp
@@ -390,8 +403,8 @@ function moveToNextPillar() {
         passedPillars.shift();
     }
     
-    // KHÔNG render passed pillars vì container không tồn tại
-    // renderPassedPillars();
+    // Render các cột đã qua
+    renderPassedPillars();
     
     // Dùng VỊ TRÍ BAN ĐẦU, KHÔNG PHẢI VỊ TRÍ SAU KHI DI CHUYỂN
     const nextLeft = initialNextPillarLeft;
@@ -406,7 +419,7 @@ function moveToNextPillar() {
     bridgeEl.style.transition = "none";
     bridgeEl.style.height = "0px";
     bridgeEl.style.transform = "rotate(0deg)";
-    bridgeEl.style.left = (nextLeft + nextWidth) + "px";
+    bridgeEl.style.left = (nextLeft + nextWidth - 5) + "px";
     bridgeEl.style.bottom = "200px";
     bridgeEl.style.opacity = "1";
     bridgeEl.style.visibility = "visible";
@@ -465,6 +478,16 @@ function updateQuality() {
         document.getElementById('instruction').style.color = "black";
         document.getElementById('instruction').style.fontWeight = "normal";
     }
+}
+
+// Cập nhật hiển thị mạng
+function updateLivesDisplay() {
+    const livesDisplay = document.getElementById('lives-display');
+    if (!livesDisplay) return;
+    
+    const heart = '❤️';
+    const emptyHeart = '🖤';
+    livesDisplay.innerText = heart.repeat(lives) + emptyHeart.repeat(maxLives - lives);
 }
 
 function nextTurn() {
@@ -535,6 +558,25 @@ function showTransitionScreen(title, desc) {
 function handleRetry() {
     msgOverlay.classList.add('hidden');
     
+    // Giảm 1 mạng
+    lives--;
+    updateLivesDisplay();
+    
+    console.log(`❤️ Còn ${lives} mạng`);
+    
+    // Kiểm tra hết mạng → THÔI HỌC
+    if (lives <= 0) {
+        showResult(
+            "⛔ THÔI HỌC!", 
+            "Bạn đã hết mạng! Phải bắt đầu lại từ đầu."
+        );
+        // Đặt flag để reset game khi click
+        setTimeout(() => {
+            resetGame();
+        }, 100);
+        return;
+    }
+    
     console.log(`DEBUG: currentLevelNum trước khi tính checkpoint: ${currentLevelNum}`);
     
     // Tìm checkpoint gần nhất (về đầu giai đoạn)
@@ -582,6 +624,10 @@ function replayCurrentLevel() {
     const currentWidth = levels[currentLevel].pillarWidth;
     isAnimating = false;
     
+    // Xóa các cột đã qua khi chết
+    passedPillars = [];
+    renderPassedPillars();
+    
     // Reset vị trí về đầu màn
     pillarCurrent.style.transition = "none";
     pillarNext.style.transition = "none";
@@ -598,7 +644,7 @@ function replayCurrentLevel() {
     // Reset cầu
     bridge.style.height = "0px";
     bridge.style.transform = "rotate(0deg)";
-    bridge.style.left = (50 + currentWidth) + "px";
+    bridge.style.left = (50 + currentWidth - 5) + "px";
     bridge.style.opacity = "1";
     
     console.log("🔁 CHƠI LẠI màn", currentLevelNum);
@@ -626,6 +672,14 @@ function resetGame() {
     scoreDisplay.innerText = "1 / 16";
     msgOverlay.classList.add('hidden');
     
+    // Reset mạng về 5
+    lives = maxLives;
+    updateLivesDisplay();
+    
+    // Reset tốc độ tăng (death count)
+    deathCount = 0;
+    lastDeathLevel = 0;
+    
     // Xóa các cột đã qua
     passedPillars = [];
     renderPassedPillars();
@@ -646,7 +700,7 @@ function resetGame() {
     // Reset cầu
     bridge.style.height = "0px";
     bridge.style.transform = "rotate(0deg)";
-    bridge.style.left = initialWidth + "px";
+    bridge.style.left = (initialWidth - 5) + "px";
     bridge.style.opacity = "1";
     
     // Reset hướng dẫn
@@ -678,6 +732,7 @@ function resetPositionOnly() {
     
     // Xóa các cột đã qua
     passedPillars = [];
+    renderPassedPillars();
     
     // Reset tất cả về vị trí ban đầu
     pillarCurrent.style.transition = "none";
@@ -695,7 +750,7 @@ function resetPositionOnly() {
     // Reset cầu
     bridge.style.height = "0px";
     bridge.style.transform = "rotate(0deg)";
-    bridge.style.left = (50 + currentWidth) + "px";
+    bridge.style.left = (50 + currentWidth - 5) + "px";
     bridge.style.opacity = "1";
     
     console.log("🔄 RESET vị trí về đầu - Chuyển giai đoạn!");
@@ -726,6 +781,18 @@ function startGame() {
 
 // Khởi tạo game
 function initGame() {
+    // Reset mạng về 5
+    lives = maxLives;
+    updateLivesDisplay();
+    
+    // Set vị trí ban đầu cho cầu (sát cột đầu tiên)
+    const initialPillarWidth = levels[0].pillarWidth;
+    bridge.style.left = (initialPillarWidth - 5) + "px";
+    bridge.style.bottom = "200px";
+    bridge.style.height = "0px";
+    bridge.style.transform = "rotate(0deg)";
+    bridge.style.opacity = "1";
+    
     updateQuality();
     nextTurn();
 }
