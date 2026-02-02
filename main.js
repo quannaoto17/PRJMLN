@@ -36,7 +36,7 @@ let deathCount = 0; // Số lần chết ở màn hiện tại
 let lastDeathLevel = 0; // Level cuối cùng chết
 
 // Hệ thống mạng (lives)
-let lives = 5; // Số mạng còn lại
+let lives = 10; // Số mạng còn lại
 const maxLives = 5; // Tối đa 5 mạng mỗi màn
 
 // Cấu trúc chương học
@@ -155,17 +155,17 @@ function getBridgeSpeed() {
         baseSpeed = 7 + (currentLevelNum - 6) * 0.75;
     } else if (currentLevelNum <= 12) {
         // THPT: 10 -> 15
-        baseSpeed = 10 + (currentLevelNum - 10) * 1.67;
+        baseSpeed = 10 + (currentLevelNum - 10) * 1 //1.67;
     } else {
         // Đại học: 15 -> 20
-        baseSpeed = 15 + (currentLevelNum - 13) * 1.25;
+        baseSpeed = 15 + (currentLevelNum - 13) * 1; //1.25;
     }
     
     // Tăng tốc độ mỗi lần chết (+2 mỗi lần thay vì +1.5)
-    const deathPenalty = deathCount * 2;
+    const deathPenalty = deathCount * 1; //2;
     
     // Nếu ở Đại học, khó GẤP ĐÔI
-    const collegeMultiplier = isInCollege() ? 1.5 : 1;
+    const collegeMultiplier = isInCollege() ? 1 : 1; //1.5;
     
     return (baseSpeed + deathPenalty) * collegeMultiplier;
 }
