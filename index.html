@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Dialectical Bridge - Triết học 4.0</title>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.css?v=11">
+    <script>
+        // Tự động redirect sang intro.html nếu không đến từ intro
+        if (!sessionStorage.getItem('from_intro')) {
+            window.location.href = 'intro.html';
+        }
+    </script>
 </head>
 <body>
     <!-- Main Menu Screen - HIDDEN -->
@@ -41,7 +47,14 @@
                 <div class="bg-pillar" style="left: 85%; height: 160px; width: 45px;"></div>
             </div>
             <div id="player">👶</div>
-            <div id="countdown-display" style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); font-size: 48px; font-weight: bold; color: #ff6b6b; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); display: none; z-index: 100;"></div>
+            <div id="countdown-display"></div>
+            
+            <!-- Dialogue Notification -->
+            <div id="dialogue-notification">
+                <div id="dialogue-text"></div>
+                <button id="dialogue-skip" style="display: none; margin-top: 10px; padding: 8px 20px; background: #ffd700; color: #2c3e50; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Bỏ qua ⏩</button>
+            </div>
+            
             <div id="bridge"></div>
             <div id="pillar-container">
                 <div id="passed-pillars"></div>
@@ -71,8 +84,19 @@
                 <button id="submit-answer" onclick="submitAnswer()" disabled>Tiếp theo</button>
             </div>
         </div>
+
+        <!-- Tutorial Overlay -->
+        <div id="tutorial-overlay" class="hidden">
+            <div class="tutorial-content">
+                <h2 id="tutorial-title"></h2>
+                <div id="tutorial-progress">Bước <span id="tutorial-step">1</span> / <span id="tutorial-total">3</span></div>
+                <p id="tutorial-text"></p>
+                <button id="tutorial-next" onclick="nextTutorialStep()">Tiếp theo ➡️</button>
+            </div>
+        </div>
     </div>
 
+    <script src="dialogues.js"></script>
     <script src="main.js"></script>
     <script>
         // Tự động bắt đầu game khi load trang

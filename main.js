@@ -298,11 +298,15 @@ function checkLeap() {
     
     // Khoảng cách Điểm nút: từ gap đến (gap + pWidth)
     if (effectiveBridgeLength < gap) {
-        showResult("SAI LẦM TẢ KHUYNH", "Bạn quá nôn nóng! Lượng chưa tích lũy đủ đến Điểm Nút đã đòi thực hiện bước nhảy.");
+        // THOẠI: Thất bại Tả Khuynh
+        const failureDialogue = getFailureDialogue(currentLevelNum, false);
+        showResult("SAI LẦM TẢ KHUYNH", failureDialogue);
         isAnimating = false;
     } 
     else if (effectiveBridgeLength > (gap + pWidth)) {
-        showResult("SAI LẦM HỮU KHUYNH", "Bạn quá bảo thủ! Lượng đã thừa nhưng bạn không nắm bắt Điểm Nút để thực hiện bước nhảy đúng lúc.");
+        // THOẠI: Thất bại Hữu Khuynh
+        const failureDialogue = getFailureDialogue(currentLevelNum, false);
+        showResult("SAI LẦM HỮU KHUYNH", failureDialogue);
         isAnimating = false;
     } 
     else {
@@ -334,27 +338,29 @@ function successLeap() {
         
         // Kiểm tra checkpoint (Lớp 5, 9, 12) - Kỳ thi chuyển cấp
         if (currentLevelNum == 6) {
-            isAnimating = false;
-            startCheckpointQuiz(5);
+            // Hiện tutorial TRƯỚC, sau đó mới thi
+            pendingQuizGrade = 5; // Đánh dấu có quiz đang chờ
+            setTimeout(() => {
+                startTutorial('level6');
+            }, 1000);
             return;
         }
         if (currentLevelNum == 10) {
-            isAnimating = false;
-            startCheckpointQuiz(9);
+            startCheckpointWithCountdown(9);
             return;
         }
         if (currentLevelNum == 13) {
-            isAnimating = false;
-            startCheckpointQuiz(12);
+            startCheckpointWithCountdown(12);
             return;
         }
         
         // ============ CHỈNH SỬA Ở ĐÂY ============
         // Kiểm tra thắng game (hoàn thành Đại học năm thứ 4)
         if (currentLevelNum > 16) {
+            // THOẠI: Tốt nghiệp Đại học
+            const graduationDialogue = getSuccessDialogue(16, true);
             // Hiển thị màn hình kết thúc game trước
-            showResult("🎓 TỐT NGHIỆP ĐẠI HỌC!", 
-                "Chúc mừng! Bạn đã hoàn thành tất cả 16 cấp độ và tốt nghiệp Đại học!\n\nChuẩn bị chuyển sang phần tiếp theo...");
+            showResult("🎓 TỐT NGHIỆP ĐẠI HỌC!", graduationDialogue);
             
             // Sau 3 giây, chuyển sang file twist.html
             setTimeout(() => {
@@ -376,6 +382,12 @@ function successLeap() {
         // ============ KẾT THÚC CHỈNH SỬA ============
         
         scoreDisplay.innerText = currentLevelNum + " / 16";
+        
+        // THOẠI: Vượt cột mốc thành công (BỎ QUA nếu là level 6 - đang có tutorial)
+        if (currentLevelNum !== 6) {
+            const successDialogue = getSuccessDialogue(currentLevelNum - 1, false);
+            showDialogueNotification(successDialogue);
+        }
         
         // Hiệu ứng visual cho Bước nhảy thành công
         document.body.classList.add('leap-success');
@@ -849,6 +861,32 @@ function returnToMenu() {
     resetGame();
 }
 
+// Hàm hiển thị thoại notification
+function showDialogueNotification(text) {
+    // Nếu đang tutorial thì không hiển thị thoại thường
+    if (isTutorialActive) return;
+    
+    const notification = document.getElementById('dialogue-notification');
+    const textEl = document.getElementById('dialogue-text');
+    if (!notification || !textEl) return;
+    
+    textEl.innerText = text;
+    notification.style.display = 'block';
+    notification.style.position = 'fixed';
+    notification.style.top = '130px';
+    notification.style.left = '50%';
+    notification.style.transform = 'translateX(-50%)';
+    
+    // Ẩn nút skip cho thoại thường
+    const skipBtn = document.getElementById('dialogue-skip');
+    if (skipBtn) skipBtn.style.display = 'none';
+    
+    // Tự động ẩn sau 3 giây
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+
 // Hàm bắt đầu game từ main menu
 function startGame() {
     document.getElementById('main-menu').classList.add('hidden');
@@ -872,6 +910,15 @@ function initGame() {
     
     updateQuality();
     nextTurn();
+    
+    // Hiển thị tutorial level 1 khi vào từ intro
+    const fromIntro = sessionStorage.getItem('from_intro');
+    if (fromIntro === 'true') {
+        sessionStorage.removeItem('from_intro');
+        setTimeout(() => {
+            startTutorial('level1');
+        }, 1000);
+    }
 }
 
 // ===== HỆ THỐNG QUIZ =====
@@ -1002,9 +1049,12 @@ function finishQuiz() {
         
         console.log(`❌ FAIL QUIZ Lớp ${checkpointLevel} → Quay về Lớp ${config.failTo}`);
         
+        // THOẠI: Trượt kỳ thi checkpoint
+        const failDialogue = getFailureDialogue(checkpointLevel, true);
+        
         showResult(
             `RỚT KỲ THI LỚP ${checkpointLevel}!`,
-            `Bạn chỉ trả lời đúng ${correctAnswers}/${currentQuizQuestions.length} câu. Chưa đủ lượng để thực hiện bước nhảy! Quay về Lớp ${config.failTo}.`
+            failDialogue
         );
         
         // Đợi người dùng click "Thử lại" thì sẽ reset vị trí trong handleRetry()
@@ -1013,13 +1063,16 @@ function finishQuiz() {
 
 // Hiệu ứng bước nhảy hoàn thành
 function showLeapComplete() {
+    // THOẠI: Vượt checkpoint thành công
+    const checkpointDialogue = getSuccessDialogue(checkpointLevel, true);
+    
     const overlay = document.createElement('div');
     overlay.id = 'leap-complete-overlay';
     overlay.innerHTML = `
         <div class="leap-complete-content">
             <h1>🎉 BƯỚC NHẢY HOÀN THÀNH 🎉</h1>
             <h2>CHẤT MỚI RA ĐỜI</h2>
-            <p>Chúc mừng! Bạn đã vượt qua Lớp ${checkpointLevel}</p>
+            <p>${checkpointDialogue}</p>
             <div class="confetti">✨🎊🎉🎊✨</div>
         </div>
     `;
@@ -1045,6 +1098,172 @@ function continueGame() {
     
     // RESET vị trí về đầu sau khi qua checkpoint (chuyển giai đoạn)
     resetPositionOnly();
+}
+
+// ===== HỆ THỐNG TUTORIAL =====
+
+// Hàm helper: Hiển countdown trước khi bắt đầu thi
+function startCheckpointWithCountdown(grade) {
+    const countdownDisplay = document.getElementById('countdown-display');
+    if (!countdownDisplay) {
+        isAnimating = false;
+        startCheckpointQuiz(grade);
+        return;
+    }
+    
+    let countdown = 3;
+    countdownDisplay.innerText = `Bắt đầu thi trong ${countdown}s...`;
+    countdownDisplay.style.display = 'block';
+    
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            countdownDisplay.innerText = `Bắt đầu thi trong ${countdown}s...`;
+        } else {
+            clearInterval(countdownInterval);
+            countdownDisplay.style.display = 'none';
+            isAnimating = false;
+            startCheckpointQuiz(grade); // Bắt đầu thi!
+        }
+    }, 1000);
+}
+
+const tutorialData = {
+    level1: [
+        "🎯 Chào mừng đến với Con Đường Học Vấn!\n\nTrò chơi này về Quy luật: LƯỢNG ⟹ CHẤT",
+        "📚 LƯỢNG là sự tích lũy dần dần\n(Nhấn giữ chuột = độ dài cây cầu)\n\n✨ CHẤT là bước nhảy vượt bậc\n(Sang cột tiếp theo = thành công)",
+        "⚖️ ĐIỂM NÚT: Khoảng cách vừa đủ để cầu chạm cột\n\n⚠️ TẢ KHUYNH: Cầu quá ngắn (nôn nóng!)\n❌ HỮU KHUYNH: Cầu quá dài (trì trệ!)\n✅ CHÍNH XÁC: Vừa đủ lượng, đúng lúc!"
+    ],
+    level6: [
+        "📝 Sắp đến Kỳ thi Chuyển cấp!\n\nBạn sẽ trả lời các câu hỏi biện chứng\ncủa môn Triết học 1 (MLN111)",
+        "🎯 Quy tắc thi:\n• Trả lời đúng ≥ 50% số câu hỏi (Đạt đủ lượng)\n• Trong thời gian quy định\n• Đậu = Tiếp tục THCS\n• Trượt = Về đầu Tiểu học",
+        "💡 Nội dung thi:\nCác khái niệm biện chứng cơ bản:\n• QUY LUẬT LƯỢNG - CHẤT\n• ĐIỂM NÚT chuyển hóa\n• TẢ KHUYNH và HỮU KHUYNH\n\nĐọc kỹ câu hỏi trước khi chọn!"
+    ]
+};
+
+let currentTutorialMessages = [];
+let currentTutorialIndex = 0;
+let typingInterval = null;
+let isTutorialActive = false;
+let pendingQuizGrade = null; // Lưu grade của quiz đang chờ sau tutorial
+
+function startTutorial(levelKey) {
+    if (!tutorialData[levelKey]) return;
+    
+    currentTutorialMessages = tutorialData[levelKey];
+    currentTutorialIndex = 0;
+    isTutorialActive = true;
+    isAnimating = true; // Khóa game
+    
+    showTutorialMessage();
+}
+
+function showTutorialMessage() {
+    if (currentTutorialIndex >= currentTutorialMessages.length) {
+        endTutorial();
+        return;
+    }
+    
+    const message = currentTutorialMessages[currentTutorialIndex];
+    const notification = document.getElementById('dialogue-notification');
+    const textEl = document.getElementById('dialogue-text');
+    const skipBtn = document.getElementById('dialogue-skip');
+    
+    if (!notification || !textEl) return;
+    
+    // Hiển thị notification
+    notification.style.display = 'block';
+    notification.style.position = 'fixed';
+    notification.style.top = '130px';
+    textEl.innerText = '';
+    
+    // Hiển thị nút Skip
+    if (skipBtn) {
+        skipBtn.style.display = 'inline-block';
+        skipBtn.onclick = skipToNextTutorialMessage;
+    }
+    
+    // Typing animation
+    let charIndex = 0;
+    clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+        if (charIndex < message.length) {
+            textEl.innerText += message.charAt(charIndex);
+            charIndex++;
+        } else {
+            clearInterval(typingInterval);
+            // Tự động chuyển sau 4 giây
+            setTimeout(() => {
+                if (isTutorialActive) {
+                    nextTutorialMessage();
+                }
+            }, 4000);
+        }
+    }, 50);
+}
+
+function skipToNextTutorialMessage() {
+    clearInterval(typingInterval);
+    const message = currentTutorialMessages[currentTutorialIndex];
+    const textEl = document.getElementById('dialogue-text');
+    if (textEl) {
+        textEl.innerText = message; // Hiển thị toàn bộ
+    }
+    // Chuyển ngay
+    setTimeout(nextTutorialMessage, 500);
+}
+
+function nextTutorialMessage() {
+    currentTutorialIndex++;
+    showTutorialMessage();
+}
+
+function endTutorial() {
+    clearInterval(typingInterval);
+    isTutorialActive = false;
+    
+    const notification = document.getElementById('dialogue-notification');
+    const skipBtn = document.getElementById('dialogue-skip');
+    
+    // Ẩn nút skip
+    if (skipBtn) skipBtn.style.display = 'none';
+    
+    // Ẩn notification
+    if (notification) {
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 500);
+    }
+    
+    // Kiểm tra nếu có quiz đang chờ
+    if (pendingQuizGrade !== null) {
+        const grade = pendingQuizGrade;
+        pendingQuizGrade = null; // Reset
+        startCheckpointWithCountdown(grade);
+        return;
+    }
+    
+    // Hiển thị countdown 5s trước khi cho phép chơi (tutorial bình thường)
+    const countdownDisplay = document.getElementById('countdown-display');
+    if (countdownDisplay) {
+        let countdown = 5;
+        countdownDisplay.innerText = countdown;
+        countdownDisplay.style.display = 'block';
+        
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                countdownDisplay.innerText = countdown;
+            } else {
+                clearInterval(countdownInterval);
+                countdownDisplay.style.display = 'none';
+                isAnimating = false; // Mở khóa game
+                console.log("✅ Tutorial hoàn thành! Có thể chơi!");
+            }
+        }, 1000);
+    } else {
+        isAnimating = false;
+    }
 }
 
 // Không tự động khởi tạo game khi load trang

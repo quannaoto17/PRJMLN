@@ -310,6 +310,8 @@
             document.getElementById('video').classList.add('fade-out');
 
             setTimeout(() => {
+                // Đánh dấu đang chuyển từ intro
+                sessionStorage.setItem('from_intro', 'true');
                 window.location.href = "index.html";
             }, 1200); // đợi animation fade-out xong
         }
