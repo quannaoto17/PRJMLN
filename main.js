@@ -765,7 +765,7 @@ function resetGame() {
 function resetPositionOnly() {
     bridgeLength = 0;
     const currentWidth = levels[currentLevel].pillarWidth;
-    isAnimating = false;
+    isAnimating = true; // Khóa click khi chuyển cảnh
     
     // Reset số lần chết khi chuyển giai đoạn
     deathCount = 0;
@@ -804,6 +804,32 @@ function resetPositionOnly() {
         bridge.style.transition = "transform 0.5s ease";
         
         nextTurn();
+        
+        // Hiển thị đếm ngược 5s
+        const countdownDisplay = document.getElementById('countdown-display');
+        if (countdownDisplay) {
+            let countdown = 5;
+            countdownDisplay.innerText = countdown;
+            countdownDisplay.style.display = 'block';
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    countdownDisplay.innerText = countdown;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownDisplay.style.display = 'none';
+                    isAnimating = false;
+                    console.log("✅ Có thể click tiếp!");
+                }
+            }, 1000);
+        } else {
+            // Fallback nếu không có countdown display
+            setTimeout(() => {
+                isAnimating = false;
+                console.log("✅ Có thể click tiếp!");
+            }, 5000);
+        }
     }, 50);
 }
 

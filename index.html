@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-    <!-- Main Menu Screen -->
-    <div id="main-menu">
+    <!-- Main Menu Screen - HIDDEN -->
+    <div id="main-menu" class="hidden">
         <div class="menu-content">
             <h1 class="game-title">🌉 The Dialectical Bridge</h1>
             <h2 class="game-subtitle">Triết học 4.0</h2>
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div id="game-container" class="hidden">
+    <div id="game-container">
         <div id="ui-layer">
             <h2 id="level-name">Tiểu Học Cơ Sở - Lớp 1</h2>
             <p id="instruction">Nhấn giữ chuột để tích lũy LƯỢNG (độ dài cầu)</p>
@@ -41,6 +41,7 @@
                 <div class="bg-pillar" style="left: 85%; height: 160px; width: 45px;"></div>
             </div>
             <div id="player">👶</div>
+            <div id="countdown-display" style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); font-size: 48px; font-weight: bold; color: #ff6b6b; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); display: none; z-index: 100;"></div>
             <div id="bridge"></div>
             <div id="pillar-container">
                 <div id="passed-pillars"></div>
@@ -73,5 +74,11 @@
     </div>
 
     <script src="main.js"></script>
+    <script>
+        // Tự động bắt đầu game khi load trang
+        window.addEventListener('DOMContentLoaded', () => {
+            initGame();
+        });
+    </script>
 </body>
 </html>
