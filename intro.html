@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Intro – Con Đường Học Vấn</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #video {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .scene {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(1.05);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
+
+        .scene.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bg-particles::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(120deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 40px);
+            animation: drift 20s linear infinite;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-200px);
+            }
+        }
+
+        h1 {
+            font-size: clamp(32px, 5vw, 72px);
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        p {
+            font-size: clamp(16px, 2vw, 24px);
+            opacity: 0.85;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .glow {
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+        }
+
+        .bar {
+            width: 60%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+            margin-top: 40px;
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #22c55e, #3b82f6, #facc15);
+            transition: width 0.6s ease;
+            animation: fillBar 32s linear forwards;
+        }
+
+        /* .fill { height: 100%; width: 0; background: linear-gradient(90deg, #22c55e, #3b82f6, #facc15); } */
+        /* .fill { height: 100%; width: 0; background: linear-gradient(90deg, #22c55e, #3b82f6, #facc15); animation: fillBar 30s linear forwards; } */
+        @keyframes fillBar {
+            to {
+                width: 100%;
+            }
+        }
+
+        .char {
+            font-size: 120px;
+            margin-bottom: 24px;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 32px;
+            right: 32px;
+            display: flex;
+            gap: 16px;
+            z-index: 20;
+        }
+
+        button {
+            padding: 12px 22px;
+            border-radius: 999px;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+        }
+
+        #startBtn {
+            background: linear-gradient(135deg, #22c55e, #3b82f6);
+        }
+
+        .fade-out {
+            animation: fadeOut 1.2s forwards;
+        }
+
+        .character {
+            width: 140px;
+            height: 220px;
+            position: relative;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.35));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* thân người */
+        .character::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, #e5e7eb, #9ca3af);
+            border-radius: 60px 60px 40px 40px;
+            clip-path: polygon(35% 0%, 65% 0%, 75% 20%, 80% 50%, 65% 100%, 35% 100%, 20% 50%, 25% 20%);
+        }
+
+        /* aura */
+        .character::after {
+            content: "";
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.35), transparent 70%);
+            z-index: -1;
+        }
+
+        /* 👶 TIỂU HỌC */
+        .child {
+            --scale: 0.85;
+        }
+
+        .child::after {
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.45), transparent 70%);
+        }
+
+        /* 👦 THCS */
+        .teen {
+            --scale: 1;
+        }
+
+        .teen::after {
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.45), transparent 70%);
+        }
+
+        .bar.hud {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            z-index: 10;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(var(--scale, 1));
+            }
+
+            50% {
+                transform: translateY(-12px) scale(var(--scale, 1));
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="video" class="bg-particles">
+        <div class="scene active" id="s1">
+            <h1 class="glow">MỘT ĐỨA TRẺ BẮT ĐẦU HÀNH TRÌNH</h1>
+            <p>Ngày đầu đến lớp, cặp sách còn lớn hơn cả ước mơ.<br />Mỗi ngày trôi qua là một bước đi nhỏ trên con
+                đường học vấn.</p> <!-- <div class="bar"> <div class="fill"></div> </div> -->
+        </div>
+        <div class="scene" id="s2">
+            <div class="char">👶</div>
+            <h1>NHỮNG NĂM THÁNG TÍCH LŨY</h1>
+            <p>Bài tập chồng chất. Kỳ thi nối tiếp.<br />Có lúc muốn bỏ cuộc, nhưng con đường vẫn còn đó.</p>
+        </div>
+        <div class="scene" id="s3">
+            <div class="char"> 👦</div>
+            <h1 class="glow">KHOẢNH KHẮC CHUYỂN MÌNH</h1>
+            <p>Một kỳ thi quyết định – nơi bạn phải bước qua hoặc ngã xuống.</p>
+        </div>
+        <div class="scene" id="s4">
+            <h1 class="glow">CON ĐƯỜNG HỌC VẤN</h1>
+            <p>The Path of Education<br />Một trò chơi về hành trình trưởng thành.</p>
+        </div>
+        <div class="bar hud">
+            <div class="fill"></div>
+        </div>
+        <div id="controls"> <button id="startBtn">Bỏ qua</button> </div>
+    </div>
+    <script>
+        const scenes = [...document.querySelectorAll('.scene')];
+        const fill = document.querySelector('.fill');
+
+        const sceneData = [
+            { duration: 5000 },
+            { duration: 6000 },
+            { duration: 5000 },
+            { duration: 6000 }
+        ];
+
+        let currentScene = 0;
+        let startTime = 0;
+        let rafId = null;
+        let timeoutId = null;
+
+        const totalScenes = scenes.length;
+        const segment = 100 / totalScenes;
+
+        function showScene(index) {
+            scenes.forEach(s => s.classList.remove('active'));
+            scenes[index].classList.add('active');
+
+            // reset timer
+            startTime = 0;
+            cancelAnimationFrame(rafId);
+            clearTimeout(timeoutId);
+
+            // timeout auto next
+            timeoutId = setTimeout(nextScene, sceneData[index].duration);
+
+            // start progress
+            rafId = requestAnimationFrame(updateFill);
+        }
+
+        function updateFill(timestamp) {
+            if (!startTime) startTime = timestamp;
+
+            const elapsed = timestamp - startTime;
+            const duration = sceneData[currentScene].duration;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const base = segment * currentScene;
+            fill.style.width = (base + progress * segment) + '%';
+
+            if (progress < 1) {
+                rafId = requestAnimationFrame(updateFill);
+            }
+        }
+
+        function nextScene() {
+            cancelAnimationFrame(rafId);
+            clearTimeout(timeoutId);
+
+            // ép fill đúng cuối scene
+            fill.style.width = ((currentScene + 1) * segment) + '%';
+
+            if (currentScene < totalScenes - 1) {
+                currentScene++;
+                showScene(currentScene);
+            } else {
+                endIntro();
+            }
+        }
+
+        function endIntro() {
+            cancelAnimationFrame(rafId);
+            clearTimeout(timeoutId);
+
+            document.getElementById('video').classList.add('fade-out');
+            setTimeout(() => {
+                alert('👉 Chuyển sang màn hình game');
+            }, 1200);
+        }
+
+        // CLICK → chuyển scene
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            nextScene();
+        });
+
+        // NÚT BỎ QUA
+        document.getElementById('startBtn').onclick = endIntro;
+
+        // START
+        showScene(currentScene);
+    </script>
+
+
+</html>
