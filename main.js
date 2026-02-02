@@ -292,12 +292,16 @@ function checkLeap() {
     const gap = levels[currentLevel].gap;
     const pWidth = levels[currentLevel].pillarWidth;
     
+    // Điều chỉnh độ dài cầu vì cầu đã dịch sang trái 5px
+    const bridgeOffset = 7; // Cầu đã lùi vào 7px
+    const effectiveBridgeLength = bridgeLength - bridgeOffset;
+    
     // Khoảng cách Điểm nút: từ gap đến (gap + pWidth)
-    if (bridgeLength < gap) {
+    if (effectiveBridgeLength < gap) {
         showResult("SAI LẦM TẢ KHUYNH", "Bạn quá nôn nóng! Lượng chưa tích lũy đủ đến Điểm Nút đã đòi thực hiện bước nhảy.");
         isAnimating = false;
     } 
-    else if (bridgeLength > (gap + pWidth)) {
+    else if (effectiveBridgeLength > (gap + pWidth)) {
         showResult("SAI LẦM HỮU KHUYNH", "Bạn quá bảo thủ! Lượng đã thừa nhưng bạn không nắm bắt Điểm Nút để thực hiện bước nhảy đúng lúc.");
         isAnimating = false;
     } 
