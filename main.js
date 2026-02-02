@@ -69,9 +69,9 @@ const levels = [
     
     // Đại Học (Hell Mode) - Chất cao cấp, yêu cầu sự tự giác tuyệt đối
     { name: "Năm 1", icon: "🎓", pillarWidth: 40, gap: 240 },
-    { name: "Năm 2", icon: "🎓", pillarWidth: 35, gap: 260 },
-    { name: "Năm 3", icon: "🎓", pillarWidth: 30, gap: 280 },
-    { name: "Năm 4", icon: "🎓", pillarWidth: 25, gap: 300 }
+    { name: "Năm 2", icon: "🎓", pillarWidth: 35, gap: 250 },
+    { name: "Năm 3", icon: "🎓", pillarWidth: 30, gap: 260 },
+    { name: "Năm 4", icon: "🎓", pillarWidth: 25, gap: 270 }
 ];
 
 let currentLevel = 0;
@@ -155,17 +155,17 @@ function getBridgeSpeed() {
         baseSpeed = 7 + (currentLevelNum - 6) * 0.75;
     } else if (currentLevelNum <= 12) {
         // THPT: 10 -> 15
-        baseSpeed = 10 + (currentLevelNum - 10) * 1 //1.67;
+        baseSpeed = 10 + (currentLevelNum - 10) * 1.67 //;
     } else {
         // Đại học: 15 -> 20
-        baseSpeed = 15 + (currentLevelNum - 13) * 1; //1.25;
+        baseSpeed = 15 + (currentLevelNum - 13) * 1.25; //;
     }
     
     // Tăng tốc độ mỗi lần chết (+2 mỗi lần thay vì +1.5)
-    const deathPenalty = deathCount * 1; //2;
+    const deathPenalty = deathCount * 2;
     
     // Nếu ở Đại học, khó GẤP ĐÔI
-    const collegeMultiplier = isInCollege() ? 1 : 1; //1.5;
+    const collegeMultiplier = isInCollege() ? 1.25 : 1;
     
     return (baseSpeed + deathPenalty) * collegeMultiplier;
 }
@@ -457,6 +457,9 @@ function moveToNextPillar() {
         
         // Gọi nextTurn để tạo cột mới
         nextTurn();
+        
+        // Unlock click cho trường hợp chuyển màn thường (không có countdown)
+        isAnimating = false;
     }, 50);
 }
 
@@ -537,7 +540,8 @@ function nextTurn() {
     
     console.log("Next pillar INITIAL at:", nextPillarLeft + "px", "Current pillar at:", currentPillarLeft + "px", "Gap:", levels[currentLevel].gap);
     
-    isAnimating = false;
+    // KHÔNG unlock isAnimating ở đây - để các hàm gọi tự quản lý
+    // isAnimating = false; (đã bỏ để tránh unlock sớm khi đang countdown)
     
     // Bắt đầu di chuyển cột nếu cần
     startPillarMovement();
@@ -698,6 +702,9 @@ function replayCurrentLevel() {
         bridge.style.transition = "transform 0.5s ease";
         
         nextTurn();
+        
+        // Unlock click cho replay level (không có countdown)
+        isAnimating = false;
     }, 50);
 }
 
@@ -758,6 +765,9 @@ function resetGame() {
         
         updateQuality();
         nextTurn();
+        
+        // Unlock click cho reset game (không có countdown)
+        isAnimating = false;
     }, 50);
 }
 
@@ -924,6 +934,11 @@ function selectAnswer(index) {
 // Submit đáp án
 function submitAnswer() {
     if (selectedAnswer === null) return;
+    
+    // NGĂN SPAM: Disable nút submit ngay lập tức
+    const submitButton = document.getElementById('submit-answer');
+    if (submitButton.disabled) return; // Đã submit rồi, bỏ qua
+    submitButton.disabled = true;
     
     const question = currentQuizQuestions[currentQuestionIndex];
     const isCorrect = selectedAnswer === question.correct;
