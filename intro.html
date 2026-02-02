@@ -308,10 +308,12 @@
             clearTimeout(timeoutId);
 
             document.getElementById('video').classList.add('fade-out');
+
             setTimeout(() => {
-                alert('👉 Chuyển sang màn hình game');
-            }, 1200);
+                window.location.href = "index.html";
+            }, 1200); // đợi animation fade-out xong
         }
+
 
         // CLICK → chuyển scene
         document.addEventListener('click', (e) => {
