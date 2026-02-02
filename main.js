@@ -349,12 +349,31 @@ function successLeap() {
             return;
         }
         
-        // Kiểm tra thắng game (hoàn thành Đại học)
+        // ============ CHỈNH SỬA Ở ĐÂY ============
+        // Kiểm tra thắng game (hoàn thành Đại học năm thứ 4)
         if (currentLevelNum > 16) {
-            showResult("TỐT NGHIỆP ĐẠI HỌC!", "Chúc mừng! Bạn đã hoàn thành tất cả 16 cấp độ và tốt nghiệp Đại học với thành tích xuất sắc!");
+            // Hiển thị màn hình kết thúc game trước
+            showResult("🎓 TỐT NGHIỆP ĐẠI HỌC!", 
+                "Chúc mừng! Bạn đã hoàn thành tất cả 16 cấp độ và tốt nghiệp Đại học!\n\nChuẩn bị chuyển sang phần tiếp theo...");
+            
+            // Sau 3 giây, chuyển sang file twist.html
+            setTimeout(() => {
+                // Lưu thông tin thành tích nếu cần
+                const achievement = {
+                    completed: true,
+                    time: new Date().toISOString(),
+                    attempts: deathCount
+                };
+                localStorage.setItem('dialectical_bridge_achievement', JSON.stringify(achievement));
+                
+                // Chuyển sang file twist.html
+                window.location.href = 'twist.html';
+            }, 3000);
+            
             isAnimating = false;
             return;
         }
+        // ============ KẾT THÚC CHỈNH SỬA ============
         
         scoreDisplay.innerText = currentLevelNum + " / 16";
         
@@ -389,7 +408,7 @@ function successLeap() {
             // Chuyển cảnh bình thường: Cột tiếp theo trở thành cột hiện tại
             moveToNextPillar();
         }
-    }, 900); // Tăng thời gian để player kịp di chuyển
+    }, 900);
 }
 
 function moveToNextPillar() {
@@ -528,10 +547,28 @@ function showResult(title, desc) {
     document.getElementById('msg-title').innerText = title;
     document.getElementById('msg-desc').innerText = desc;
     
-    // RESET button về handleRetry() (phòng trường hợp bị override từ showTransitionScreen)
-    const button = msgOverlay.querySelector('button');
-    button.innerText = "Thử lại (Rút kinh nghiệm)";
-    button.onclick = function() { handleRetry(); };
+    // Kiểm tra nếu đây là màn hình tốt nghiệp thì đổi nút
+    if (title.includes("TỐT NGHIỆP ĐẠI HỌC")) {
+        const button = msgOverlay.querySelector('button');
+        button.innerText = "Chuyển sang phần tiếp theo";
+        button.onclick = function() {
+            // Lưu thông tin thành tích
+            const achievement = {
+                completed: true,
+                time: new Date().toISOString(),
+                attempts: deathCount
+            };
+            localStorage.setItem('dialectical_bridge_achievement', JSON.stringify(achievement));
+            
+            // Chuyển sang file twist.html
+            window.location.href = 'twist.html';
+        };
+    } else {
+        // RESET button về handleRetry() (phòng trường hợp bị override từ showTransitionScreen)
+        const button = msgOverlay.querySelector('button');
+        button.innerText = "Thử lại (Rút kinh nghiệm)";
+        button.onclick = function() { handleRetry(); };
+    }
     
     msgOverlay.classList.remove('hidden');
 }

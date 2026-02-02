@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Truth - Con Đường Học Vấn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background: #000;
+            color: white;
+        }
+
+        /* Modern Typography */
+        .modern-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .mono-text {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* Container */
+        .twist-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Modern gradient backgrounds */
+        .bg-celebration {
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(78, 205, 196, 0.3) 0%, transparent 50%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-static {
+            background: 
+                repeating-linear-gradient(0deg, #1a1a1a 0px, #1a1a1a 2px, #000 2px, #000 4px),
+                #0a0a0a;
+        }
+
+        .bg-glitch {
+            background: #000;
+            animation: chromaticAberration 0.4s infinite;
+        }
+
+        @keyframes chromaticAberration {
+            0%, 100% { filter: hue-rotate(0deg) contrast(1); }
+            25% { filter: hue-rotate(90deg) contrast(1.2); }
+            50% { filter: hue-rotate(180deg) contrast(1.5); }
+            75% { filter: hue-rotate(270deg) contrast(1.2); }
+        }
+
+        .bg-truth {
+            background: 
+                radial-gradient(ellipse at center, rgba(13, 37, 63, 0.8) 0%, transparent 70%),
+                linear-gradient(180deg, #0a1929 0%, #001e3c 100%);
+        }
+
+        .bg-revelation {
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.4) 0%, transparent 50%),
+                linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%);
+        }
+
+        .bg-choice {
+            background: 
+                linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+
+        /* Text display */
+        .text-box {
+            max-width: 1000px;
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .scene-text {
+            font-size: 3.5em;
+            line-height: 1.3;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            transform: translateY(40px);
+            text-shadow: 0 0 0px rgba(255, 255, 255, 1);
+            min-height: 200px;
+        }
+
+        .scene-text.typing {
+            animation: none;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .char {
+            display: inline-block;
+            opacity: 0;
+            animation: charAppear 0.1s forwards;
+            position: relative;
+        }
+
+        @keyframes charAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .char.space {
+            width: 0.3em;
+        }
+
+        .char.newline {
+            display: block;
+            height: 1.3em;
+            width: 100%;
+        }
+
+        .scene-text.glitch .char {
+            animation: glitchChar 0.3s infinite;
+        }
+
+        @keyframes glitchChar {
+            0%, 100% { 
+                transform: translate(0) skew(0deg);
+                filter: hue-rotate(0deg);
+            }
+            20% { 
+                transform: translate(-1px, 1px) skew(-1deg);
+                filter: hue-rotate(90deg);
+            }
+            40% { 
+                transform: translate(1px, -1px) skew(1deg);
+                filter: hue-rotate(180deg);
+            }
+            60% { 
+                transform: translate(-1px, -1px) skew(-0.5deg);
+                filter: hue-rotate(270deg);
+            }
+            80% { 
+                transform: translate(1px, 1px) skew(0.5deg);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        @keyframes modernFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Terminal window for system errors */
+        .terminal-window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 
+                0 30px 90px rgba(255, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 0, 0, 0.2);
+            opacity: 0;
+            animation: terminalAppear 0.5s ease-out forwards;
+            overflow: hidden;
+        }
+
+        @keyframes terminalAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .terminal-header {
+            background: #2a2a2a;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { 
+            background: #ff5f56;
+            animation: dotPulse 1s ease-in-out infinite;
+        }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 95, 86, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 95, 86, 0); }
+        }
+
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            color: #888;
+            margin-left: 12px;
+        }
+
+        .terminal-body {
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: #00ff00;
+            min-height: 350px;
+            background: #0a0a0a;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin: 6px 0;
+            opacity: 0;
+            animation: terminalLineAppear 0.2s forwards;
+        }
+
+        .terminal-line.typing {
+            opacity: 1;
+        }
+
+        .terminal-char {
+            display: inline-block;
+            opacity: 0;
+            animation: terminalCharAppear 0.05s forwards;
+        }
+
+        @keyframes terminalCharAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-2px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .terminal-line.error {
+            color: #ff0000;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+            font-weight: 700;
+        }
+
+        .terminal-line.warning {
+            color: #ffbd2e;
+            text-shadow: 0 0 8px rgba(255, 189, 46, 0.6);
+        }
+
+        .terminal-line.critical {
+            color: #ff0000;
+            font-size: 1.1em;
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(255, 0, 0, 0.8);
+            animation: criticalBlink 0.5s infinite;
+        }
+
+        @keyframes criticalBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background: #00ff00;
+            margin-left: 4px;
+            animation: cursorBlink 0.8s infinite;
+        }
+
+        @keyframes terminalLineAppear {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes cursorBlink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Corruption code rain effect */
+        .corruption-rain {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .corruption-column {
+            position: absolute;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #ff0000;
+            text-shadow: 0 0 8px #ff0000;
+            white-space: pre;
+            animation: corruptionFall linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes corruptionFall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Custom SVG Icons */
+        .custom-icon {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        /* Celebration Icon - Trophy */
+        .icon-trophy {
+            animation: trophyReveal 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes trophyReveal {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* Graduation Cap Icon */
+        .icon-grad-cap {
+            animation: capFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes capFloat {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-20px) rotate(5deg);
+            }
+        }
+
+        /* Shatter animation */
+        .icon-shatter {
+            animation: shatterEffect 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes shatterEffect {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+                filter: blur(30px);
+            }
+        }
+
+        /* Spiral Icon */
+        .icon-spiral {
+            animation: spiralSpin 20s linear infinite;
+        }
+
+        @keyframes spiralSpin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Infinity Icon */
+        .icon-infinity {
+            animation: infinityPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes infinityPulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* Brain Icon */
+        .icon-brain {
+            animation: brainPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes brainPulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.6));
+            }
+            50% {
+                filter: drop-shadow(0 0 40px rgba(139, 92, 246, 1));
+            }
+        }
+
+        /* Glitch overlay */
+        .glitch-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(255, 0, 0, 0.05) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.05) 3px,
+                    transparent 4px,
+                    transparent 5px,
+                    rgba(0, 0, 255, 0.05) 6px
+                );
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .glitch-overlay.active {
+            animation: scanlines 0.1s infinite;
+        }
+
+        @keyframes scanlines {
+            0%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            50% {
+                opacity: 0.6;
+                transform: translateY(2px);
+            }
+        }
+
+        /* Particle system */
+        .particle-system {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* Floating geometric shapes */
+        .geo-shape {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: floatShape 20s linear infinite;
+        }
+
+        @keyframes floatShape {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(100vw, -100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Modern button styles */
+        .continue-btn {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            animation: modernFadeIn 0.8s ease-out 2s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .continue-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .continue-btn:hover::before {
+            left: 100%;
+        }
+
+        .continue-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateX(-50%) translateY(-5px);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        /* Modern choice buttons */
+        .choice-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 60px;
+            opacity: 0;
+            animation: modernFadeIn 0.8s ease-out 2s forwards;
+        }
+
+        .choice-btn {
+            padding: 30px 60px;
+            font-size: 1.3em;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(139, 92, 246, 0.2), 
+                rgba(59, 130, 246, 0.2));
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .choice-btn:hover::before {
+            width: 100%;
+        }
+
+        .choice-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(139, 92, 246, 0.8);
+            transform: translateX(10px);
+            box-shadow: 
+                -10px 0 30px rgba(139, 92, 246, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .choice-icon {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+
+        .choice-label {
+            display: block;
+            font-size: 0.7em;
+            opacity: 0.7;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        /* Skip hint */
+        .skip-hint {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            font-size: 0.9em;
+            font-family: 'JetBrains Mono', monospace;
+            color: rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 24px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        /* Fragment pieces */
+        .fragment-piece {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            opacity: 1;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: fragmentFly 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fragmentFly {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0);
+            }
+        }
+
+        /* Reveal light effect */
+        .reveal-light {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(255, 255, 255, 0.8) 0%, 
+                rgba(139, 92, 246, 0.4) 30%,
+                transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: lightExpand 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            z-index: 3;
+            filter: blur(40px);
+        }
+
+        @keyframes lightExpand {
+            to {
+                transform: translate(-50%, -50%) scale(15);
+                opacity: 0;
+            }
+        }
+
+        /* Sound Controls */
+        .sound-controls {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .sound-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .sound-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .sound-btn.active {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.8);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .scene-text {
+                font-size: 2em;
+                padding: 0 20px;
+            }
+            
+            .custom-icon {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .choice-btn {
+                padding: 20px 30px;
+                font-size: 1.1em;
+            }
+            
+            .text-box {
+                padding: 30px 20px;
+            }
+
+            .terminal-window {
+                width: 95%;
+            }
+
+            .terminal-body {
+                font-size: 0.75em;
+                padding: 16px;
+            }
+
+            .sound-controls {
+                top: 20px;
+                left: 20px;
+            }
+
+            .sound-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+            }
+        }
+
+        /* Loading transition */
+        .fade-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+            pointer-events: none;
+        }
+
+        .fade-transition.hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="fade-transition" id="fadeTransition"></div>
+    <div class="skip-hint">[ SPACE ] tiếp tục</div>
+    
+    <div class="sound-controls">
+        <button class="sound-btn" id="musicToggle" onclick="toggleMusic()">🎵</button>
+        <button class="sound-btn active" id="sfxToggle" onclick="toggleSFX()">🔊</button>
+    </div>
+    
+    <div class="twist-container" id="twistContainer">
+        <div class="glitch-overlay" id="glitchOverlay"></div>
+        <div class="particle-system" id="particleSystem"></div>
+        <div id="specialEffects"></div>
+        <div class="text-box">
+            <div class="scene-text modern-title" id="sceneText"></div>
+            <div id="choiceContainer"></div>
+        </div>
+    </div>
+
+    <button class="continue-btn" id="continueBtn" onclick="nextScene()">
+        TIẾP TỤC →
+    </button>
+
+    <script>
+        const twistScenes = [
+            {
+                text: "CHÚC MỪNG\nBẠN ĐÃ TỐT NGHIỆP ĐẠI HỌC",
+                background: "bg-celebration",
+                icon: "trophy",
+                effect: "celebration",
+                duration: 4000,
+                sound: "celebrate",
+                typingSpeed: 80
+            },
+            {
+                text: "Giác Ngộ Giả\nĐã Ra Đời",
+                background: "bg-celebration",
+                icon: "grad-cap",
+                effect: "particles",
+                duration: 3000,
+                sound: "positive",
+                typingSpeed: 100
+            },
+            {
+                text: "Nhưng...\nĐợi đã...",
+                background: "bg-celebration",
+                icon: "grad-cap-freeze",
+                effect: "freeze",
+                duration: 2800,
+                sound: "suspense",
+                typingSpeed: 120
+            },
+            {
+                text: "Có gì đó...\nKhông ổn...",
+                background: "bg-static",
+                icon: "none",
+                effect: "static",
+                textClass: "glitch",
+                duration: 2000,
+                sound: "glitch1",
+                typingSpeed: 150
+            },
+            {
+                text: "", // No text, terminal will show
+                background: "bg-glitch",
+                effect: "system-error",
+                textClass: "glitch",
+                duration: 35000,
+                sound: "systemError"
+            },
+            {
+                text: "",
+                background: "bg-static",
+                icon: "shatter",
+                effect: "shatter",
+                duration: 2000,
+                sound: "shatter"
+            },
+            {
+                text: "", // Corruption terminal
+                background: "bg-static",
+                effect: "corruption",
+                textClass: "glitch",
+                duration: 30000,
+                sound: "corruption"
+            },
+            {
+                text: "Sự thật là...",
+                background: "bg-truth",
+                effect: "revelation",
+                duration: 2500,
+                sound: "revelation",
+                typingSpeed: 100
+            },
+            {
+                text: "Bạn chưa bao giờ\nrời khỏi Lớp 1",
+                background: "bg-truth",
+                effect: "none",
+                duration: 3500,
+                sound: "truth",
+                typingSpeed: 80
+            },
+            {
+                text: "Mỗi 'bậc học'\nchỉ là ảo giác\ndo chính BẠN tạo ra",
+                background: "bg-truth",
+                effect: "geometric",
+                duration: 4000,
+                sound: "echo",
+                typingSpeed: 70
+            },
+            {
+                text: "Tả Khuynh và Hữu Khuynh?\nHai mặt của cùng\nmột con người",
+                background: "bg-truth",
+                icon: "duality",
+                effect: "duality",
+                duration: 4000,
+                sound: "duality",
+                typingSpeed: 60
+            },
+            {
+                text: "Lượng - Chất - Bước nhảy\nTất cả đều xảy ra\ntrong TÂM TRÍ bạn",
+                background: "bg-revelation",
+                icon: "brain",
+                effect: "mind-waves",
+                duration: 4000,
+                sound: "mind",
+                typingSpeed: 60
+            },
+            {
+                text: "Con đường học vấn\nkhông phải hành trình\ntuyến tính từ A đến Z",
+                background: "bg-revelation",
+                effect: "path",
+                duration: 4700,
+                sound: "wisdom",
+                typingSpeed: 70
+            },
+            {
+                text: "Nó là một\nVÒNG XOÁY ỐC\nvô tận",
+                background: "bg-revelation",
+                icon: "spiral",
+                effect: "spiral",
+                duration: 3500,
+                sound: "spiral",
+                typingSpeed: 90
+            },
+            {
+                text: "Mỗi lần 'tốt nghiệp'\nbạn chỉ quay lại điểm xuất phát\nở một tầng cao hơn",
+                background: "bg-revelation",
+                icon: "infinity",
+                effect: "loop",
+                duration: 4800,
+                sound: "loop",
+                typingSpeed: 60
+            },
+            {
+                text: "Giác Ngộ Giả thực sự\nkhông phải người đạt\nbằng cấp cao nhất...",
+                background: "bg-revelation",
+                effect: "none",
+                duration: 4400,
+                sound: "pause",
+                typingSpeed: 65
+            },
+            {
+                text: "...Mà là người nhận ra\nHỌC TẬP\nKHÔNG BAO GIỜ KẾT THÚC",
+                background: "bg-revelation",
+                effect: "enlightenment",
+                duration: 4000,
+                sound: "enlightenment",
+                typingSpeed: 60
+            },
+            {
+                text: "Giờ đây, bạn đã biết sự thật\nBạn sẽ chọn gì?",
+                background: "bg-choice",
+                effect: "choice-ambient",
+                showChoice: true,
+                duration: 999999,
+                sound: "choice",
+                typingSpeed: 50
+            }
+        ];
+
+        let currentScene = 0;
+        let autoPlayTimeout;
+        let isMusicEnabled = true;
+        let isSFXEnabled = true;
+        let audioContext;
+        let musicGainNode;
+        let sfxGainNode;
+        let currentMusicSource;
+        let currentTypingSound;
+        let typingInterval;
+
+        // Initialize Web Audio API
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                musicGainNode = audioContext.createGain();
+                sfxGainNode = audioContext.createGain();
+                
+                musicGainNode.connect(audioContext.destination);
+                sfxGainNode.connect(audioContext.destination);
+                
+                musicGainNode.gain.value = 0.5;
+                sfxGainNode.gain.value = 0.8;
+                
+                console.log("Audio initialized successfully");
+            } catch (e) {
+                console.warn("Web Audio API not supported:", e);
+            }
+        }
+
+        // Audio generation functions
+        function createSound(type) {
+            if (!audioContext || !isSFXEnabled) return null;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(sfxGainNode);
+            
+            switch(type) {
+                case 'typing':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 800 + Math.random() * 400;
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.05);
+                    return oscillator;
+                    
+                case 'glitch1':
+                    oscillator.type = 'square';
+                    oscillator.frequency.value = 200;
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    return oscillator;
+                    
+                case 'shatter':
+                    for(let i = 0; i < 8; i++) {
+                        setTimeout(() => {
+                            const osc = audioContext.createOscillator();
+                            const gain = audioContext.createGain();
+                            osc.connect(gain);
+                            gain.connect(sfxGainNode);
+                            
+                            osc.type = 'sine';
+                            osc.frequency.value = 600 + Math.random() * 800;
+                            gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                            
+                            osc.start();
+                            osc.stop(audioContext.currentTime + 0.5);
+                        }, i * 50);
+                    }
+                    break;
+                    
+                case 'revelation':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 2);
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.5);
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 2);
+                    return oscillator;
+                    
+                case 'enlightenment':
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 3);
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 1);
+                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 3);
+                    return oscillator;
+            }
+            
+            return oscillator;
+        }
+
+        function playBackgroundMusic(sceneType) {
+            if (!audioContext || !isMusicEnabled) return;
+            
+            if (currentMusicSource) {
+                currentMusicSource.stop();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(musicGainNode);
+            
+            oscillator.type = 'sine';
+            gainNode.gain.value = 0.1;
+            
+            switch(sceneType) {
+                case 'celebration':
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    break;
+                case 'revelation':
+                    oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime);
+                    break;
+                case 'choice':
+                    oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime);
+                    break;
+                default:
+                    oscillator.frequency.value = 293.66;
+            }
+            
+            oscillator.start();
+            currentMusicSource = oscillator;
+        }
+
+        function stopBackgroundMusic() {
+            if (currentMusicSource) {
+                currentMusicSource.stop();
+                currentMusicSource = null;
+            }
+        }
+
+        function playSceneSound(soundType) {
+            if (!audioContext || !isSFXEnabled) return;
+            
+            switch(soundType) {
+                case 'celebrate':
+                    createSound('typing');
+                    break;
+                case 'systemError':
+                    for(let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            const osc = audioContext.createOscillator();
+                            const gain = audioContext.createGain();
+                            osc.connect(gain);
+                            gain.connect(sfxGainNode);
+                            
+                            osc.type = 'square';
+                            osc.frequency.value = 100 + Math.random() * 200;
+                            gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                            
+                            osc.start();
+                            osc.stop(audioContext.currentTime + 0.2);
+                        }, i * 100);
+                    }
+                    break;
+                case 'corruption':
+                    const noise = audioContext.createBufferSource();
+                    const bufferSize = audioContext.sampleRate * 2;
+                    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    
+                    noise.buffer = buffer;
+                    noise.loop = true;
+                    
+                    const filter = audioContext.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 1000;
+                    
+                    noise.connect(filter);
+                    filter.connect(sfxGainNode);
+                    
+                    noise.start();
+                    setTimeout(() => noise.stop(), 2000);
+                    break;
+            }
+        }
+
+        function toggleMusic() {
+            isMusicEnabled = !isMusicEnabled;
+            const btn = document.getElementById('musicToggle');
+            btn.classList.toggle('active', isMusicEnabled);
+            
+            if (!isMusicEnabled) {
+                stopBackgroundMusic();
+            } else if (currentScene < twistScenes.length) {
+                playBackgroundMusic(twistScenes[currentScene].background);
+            }
+        }
+
+        function toggleSFX() {
+            isSFXEnabled = !isSFXEnabled;
+            const btn = document.getElementById('sfxToggle');
+            btn.classList.toggle('active', isSFXEnabled);
+        }
+
+        // Typing effect function
+        function typeText(element, text, speed = 100, sound = true) {
+            clearInterval(typingInterval);
+            element.innerHTML = '';
+            
+            const chars = text.split('');
+            let index = 0;
+            let lineBreak = false;
+            
+            typingInterval = setInterval(() => {
+                if (index >= chars.length) {
+                    clearInterval(typingInterval);
+                    return;
+                }
+                
+                const char = chars[index];
+                const span = document.createElement('span');
+                
+                if (char === '\n') {
+                    span.className = 'char newline';
+                    lineBreak = true;
+                } else if (char === ' ') {
+                    span.className = 'char space';
+                    span.innerHTML = '&nbsp;';
+                } else {
+                    span.className = 'char';
+                    span.textContent = char;
+                    
+                    if (sound && isSFXEnabled && /[a-zA-Z0-9À-ỹ]/.test(char)) {
+                        createSound('typing');
+                    }
+                }
+                
+                element.appendChild(span);
+                index++;
+                
+                // Scroll to keep text in view
+                if (lineBreak && index % 10 === 0) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    lineBreak = false;
+                }
+            }, speed);
+        }
+
+        // Terminal typing effect
+        function typeTerminalLine(element, text, className = '', speed = 50) {
+            return new Promise(resolve => {
+                const line = document.createElement('div');
+                line.className = `terminal-line ${className}`;
+                element.appendChild(line);
+                
+                const chars = text.split('');
+                let index = 0;
+                
+                function typeChar() {
+                    if (index >= chars.length) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const char = chars[index];
+                    const span = document.createElement('span');
+                    span.className = 'terminal-char';
+                    span.textContent = char;
+                    span.style.animationDelay = (index * 0.05) + 's';
+                    line.appendChild(span);
+                    
+                    if (isSFXEnabled && /[a-zA-Z0-9]/.test(char)) {
+                        createSound('typing');
+                    }
+                    
+                    index++;
+                    setTimeout(typeChar, speed);
+                }
+                
+                typeChar();
+            });
+        }
+
+        function init() {
+            setTimeout(() => {
+                document.getElementById('fadeTransition').classList.add('hidden');
+            }, 500);
+            
+            initAudio();
+            showScene(0);
+            createAmbientParticles();
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    nextScene();
+                }
+            });
+        }
+
+        function showScene(index) {
+            if (index >= twistScenes.length) return;
+            
+            clearTimeout(autoPlayTimeout);
+            currentScene = index;
+            const scene = twistScenes[index];
+            
+            const container = document.getElementById('twistContainer');
+            const textElement = document.getElementById('sceneText');
+            const effectsContainer = document.getElementById('specialEffects');
+            const continueBtn = document.getElementById('continueBtn');
+            const choiceContainer = document.getElementById('choiceContainer');
+            const glitchOverlay = document.getElementById('glitchOverlay');
+            
+            effectsContainer.innerHTML = '';
+            choiceContainer.innerHTML = '';
+            glitchOverlay.classList.remove('active');
+            
+            container.className = 'twist-container ' + scene.background;
+            
+            textElement.className = 'scene-text modern-title';
+            if (scene.textClass) {
+                textElement.classList.add(scene.textClass);
+            }
+            
+            // Clear any existing typing
+            clearInterval(typingInterval);
+            
+            // Play scene sound
+            if (scene.sound) {
+                playSceneSound(scene.sound);
+            }
+            
+            // Play background music
+            if (scene.background.includes('celebration')) {
+                playBackgroundMusic('celebration');
+            } else if (scene.background.includes('revelation')) {
+                playBackgroundMusic('revelation');
+            } else if (scene.background.includes('choice')) {
+                playBackgroundMusic('choice');
+            }
+            
+            if (scene.text) {
+                setTimeout(() => {
+                    textElement.classList.add('typing');
+                    typeText(textElement, scene.text, scene.typingSpeed || 80, true);
+                }, 10);
+            } else {
+                textElement.innerHTML = '';
+            }
+            
+            if (scene.icon) {
+                createCustomIcon(scene.icon, effectsContainer);
+            }
+            
+            applyEffect(scene.effect, effectsContainer);
+            
+            if (scene.showChoice) {
+                setTimeout(() => {
+                    showChoiceButtons(choiceContainer);
+                    continueBtn.style.display = 'none';
+                }, scene.text ? (scene.text.length * (scene.typingSpeed || 80) + 1000) : 1000);
+            } else {
+                continueBtn.style.display = 'block';
+            }
+            
+            if (scene.duration < 999999) {
+                autoPlayTimeout = setTimeout(() => {
+                    nextScene();
+                }, scene.duration);
+            }
+        }
+
+        function createCustomIcon(iconType, container) {
+            // Same as before, keeping it unchanged
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('custom-icon');
+            svg.setAttribute('viewBox', '0 0 200 200');
+            
+            switch(iconType) {
+                case 'trophy':
+                    svg.classList.add('icon-trophy');
+                    svg.innerHTML = `
+                        <defs>
+                            <linearGradient id="trophyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M60 80 L60 50 L40 50 L40 80 Q40 100 60 100" fill="url(#trophyGrad)" stroke="#f59e0b" stroke-width="3"/>
+                        <path d="M140 80 L140 50 L160 50 L160 80 Q160 100 140 100" fill="url(#trophyGrad)" stroke="#f59e0b" stroke-width="3"/>
+                        <rect x="70" y="40" width="60" height="80" rx="10" fill="url(#trophyGrad)" stroke="#f59e0b" stroke-width="3"/>
+                        <rect x="85" y="120" width="30" height="40" fill="url(#trophyGrad)" stroke="#f59e0b" stroke-width="3"/>
+                        <rect x="60" y="160" width="80" height="15" rx="5" fill="url(#trophyGrad)" stroke="#f59e0b" stroke-width="3"/>
+                        <circle cx="100" cy="70" r="15" fill="#fef3c7" opacity="0.8"/>
+                    `;
+                    break;
+                    
+                case 'grad-cap':
+                case 'grad-cap-freeze':
+                    if (iconType === 'grad-cap') {
+                        svg.classList.add('icon-grad-cap');
+                    }
+                    svg.innerHTML = `
+                        <defs>
+                            <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="100,50 30,80 100,110 170,80" fill="url(#capGrad)" stroke="#6366f1" stroke-width="3"/>
+                        <polygon points="100,110 85,120 85,150 100,160 115,150 115,120" fill="url(#capGrad)" stroke="#6366f1" stroke-width="2"/>
+                        <rect x="30" y="75" width="140" height="10" fill="url(#capGrad)" stroke="#6366f1" stroke-width="2"/>
+                        <line x1="170" y1="80" x2="170" y2="140" stroke="#fbbf24" stroke-width="3"/>
+                        <circle cx="170" cy="145" r="8" fill="#fbbf24"/>
+                    `;
+                    break;
+                    
+                case 'shatter':
+                    createShatterEffect(container);
+                    return;
+                    
+                case 'duality':
+                    svg.innerHTML = `
+                        <defs>
+                            <linearGradient id="dualGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="dualGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="70" cy="100" r="50" fill="url(#dualGrad1)" opacity="0.8">
+                            <animate attributeName="r" values="50;55;50" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="130" cy="100" r="50" fill="url(#dualGrad2)" opacity="0.8">
+                            <animate attributeName="r" values="50;55;50" dur="2s" begin="1s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="100" cy="100" r="30" fill="#ffffff" opacity="0.3"/>
+                    `;
+                    break;
+                    
+                case 'brain':
+                    svg.classList.add('icon-brain');
+                    svg.innerHTML = `
+                        <defs>
+                            <linearGradient id="brainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M100 50 Q80 50 70 70 Q60 90 70 110 Q75 130 90 140 Q100 145 110 140 Q125 130 130 110 Q140 90 130 70 Q120 50 100 50" 
+                              fill="url(#brainGrad)" stroke="#6366f1" stroke-width="3"/>
+                        <path d="M85 70 Q80 80 85 90" fill="none" stroke="#a78bfa" stroke-width="2"/>
+                        <path d="M95 75 Q90 85 95 95" fill="none" stroke="#a78bfa" stroke-width="2"/>
+                        <path d="M105 75 Q110 85 105 95" fill="none" stroke="#a78bfa" stroke-width="2"/>
+                        <path d="M115 70 Q120 80 115 90" fill="none" stroke="#a78bfa" stroke-width="2"/>
+                        <circle cx="85" cy="80" r="3" fill="#c4b5fd"/>
+                        <circle cx="115" cy="80" r="3" fill="#c4b5fd"/>
+                        <circle cx="100" cy="100" r="5" fill="#c4b5fd" opacity="0.6">
+                            <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    `;
+                    break;
+                    
+                case 'spiral':
+                    svg.classList.add('icon-spiral');
+                    createSpiralPath(svg);
+                    break;
+                    
+                case 'infinity':
+                    svg.classList.add('icon-infinity');
+                    svg.innerHTML = `
+                        <defs>
+                            <linearGradient id="infGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M30 100 Q50 50 75 75 Q100 100 75 125 Q50 150 30 100 Z" 
+                              fill="none" stroke="url(#infGrad)" stroke-width="8" opacity="0.6"/>
+                        <path d="M170 100 Q150 50 125 75 Q100 100 125 125 Q150 150 170 100 Z" 
+                              fill="none" stroke="url(#infGrad)" stroke-width="8" opacity="0.6"/>
+                    `;
+                    break;
+            }
+            
+            container.appendChild(svg);
+        }
+
+async function createSystemErrorTerminal(container) {
+    const terminal = document.createElement('div');
+    terminal.className = 'terminal-window';
+    terminal.innerHTML = `
+        <div class="terminal-header">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+            <div class="terminal-title">system/reality.exe</div>
+        </div>
+        <div class="terminal-body" id="terminalBody"></div>
+    `;
+    container.appendChild(terminal);
+    const terminalBody = terminal.querySelector('#terminalBody');
+
+    const messages = [
+        { text: '$ loading reality matrix...', delay: 300, class: '' },
+        { text: 'OK', delay: 400, class: '' },
+        { text: '$ initializing consciousness protocol...', delay: 500, class: '' },
+        { text: 'OK', delay: 700, class: '' },
+        { text: '$ verifying education_progress.dat...', delay: 800, class: '' },
+        { text: '', delay: 1000, class: '' },
+        { text: '⚠ WARNING: Inconsistency detected', delay: 1200, class: 'warning' },
+        { text: '⚠ WARNING: Memory integrity check failed', delay: 1300, class: 'warning' },
+        { text: '', delay: 1500, class: '' },
+        { text: '❌ ERROR: reality.validate() returned FALSE', delay: 1500, class: 'error' },
+        { text: '❌ ERROR: Timeline corruption at sector 0x4C4F43', delay: 1500, class: 'error' },
+        { text: '', delay: 1500, class: '' },
+        { text: '🚨 CRITICAL: System integrity compromised', delay: 1700, class: 'critical' },
+        { text: '🚨 CRITICAL: Unable to maintain illusion', delay: 1700, class: 'critical' },
+        { text: '', delay: 2000, class: '' },
+        { text: '>>> Initiating emergency shutdown...', delay: 2500, class: 'error' }
+    ];
+
+    for (const msg of messages) {
+        await new Promise(resolve => setTimeout(resolve, msg.delay));
+        await typeTerminalLine(terminalBody, msg.text, msg.class, 5); // Tăng tốc typing lên 20ms/char
+
+        // Pause ngắn hơn sau dòng quan trọng
+        const extraPause = msg.class.includes('critical') || msg.class.includes('error') ? 1000 : 400;
+        await new Promise(resolve => setTimeout(resolve, extraPause));
+
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+}
+
+async function createCorruptionTerminal(container) {
+    const terminal = document.createElement('div');
+    terminal.className = 'terminal-window';
+    terminal.innerHTML = `
+        <div class="terminal-header">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+            <div class="terminal-title">CORRUPTION DETECTED</div>
+        </div>
+        <div class="terminal-body" id="corruptionBody"></div>
+    `;
+    container.appendChild(terminal);
+    const terminalBody = terminal.querySelector('#corruptionBody');
+
+    const messages = [
+        { text: 'REALITY MATRIX DESTABILIZING...', delay: 300, class: 'error' },
+        { text: 'MEMORY SECTORS: CORRUPTED', delay: 600, class: 'error' },
+        { text: 'EDUCATION RECORDS: INVALID', delay: 900, class: 'error' },
+        { text: 'TIMELINE: PARADOX DETECTED', delay: 1300, class: 'error' },
+        { text: '', delay: 1500, class: '' },
+        { text: 'DECODING TRUTH PROTOCOL...', delay: 1800, class: 'warning' },
+        { text: 'ACCESS GRANTED', delay: 2000, class: '' },
+        { text: '', delay: 2400, class: '' },
+        { text: '>>> REVEALING ACTUAL STATE...', delay: 2600, class: 'critical' }
+    ];
+
+    for (const msg of messages) {
+        await new Promise(resolve => setTimeout(resolve, msg.delay));
+        await typeTerminalLine(terminalBody, msg.text, msg.class, 5); // Tăng tốc lên 25ms/char
+
+        const extraPause = msg.class.includes('critical') || msg.class.includes('error') ? 1000 : 400;
+        await new Promise(resolve => setTimeout(resolve, extraPause));
+
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+}
+
+        function createShatterEffect(container) {
+            // Same as before
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('custom-icon', 'icon-shatter');
+            svg.setAttribute('viewBox', '0 0 200 200');
+            
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="shatterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <polygon points="100,50 30,80 100,110 170,80" fill="url(#shatterGrad)" stroke="#6366f1" stroke-width="3"/>
+                <polygon points="100,110 85,120 85,150 100,160 115,150 115,120" fill="url(#shatterGrad)" stroke="#6366f1" stroke-width="2"/>
+                <rect x="30" y="75" width="140" height="10" fill="url(#shatterGrad)" stroke="#6366f1" stroke-width="2"/>
+            `;
+            
+            container.appendChild(svg);
+            
+            setTimeout(() => {
+                for (let i = 0; i < 12; i++) {
+                    const fragment = document.createElement('div');
+                    fragment.className = 'fragment-piece';
+                    fragment.style.left = '50%';
+                    fragment.style.top = '50%';
+                    fragment.style.setProperty('--tx', (Math.random() - 0.5) * 600 + 'px');
+                    fragment.style.setProperty('--ty', (Math.random() - 0.5) * 600 + 'px');
+                    fragment.style.setProperty('--rot', Math.random() * 720 + 'deg');
+                    fragment.style.animationDelay = Math.random() * 0.3 + 's';
+                    container.appendChild(fragment);
+                }
+            }, 500);
+        }
+
+        function applyEffect(effectType, container) {
+            const glitchOverlay = document.getElementById('glitchOverlay');
+            
+            switch(effectType) {
+                case 'celebration':
+                    createModernConfetti(container);
+                    break;
+                case 'particles':
+                    createFloatingParticles(container);
+                    break;
+                case 'static':
+                    glitchOverlay.classList.add('active');
+                    break;
+                case 'system-error':
+                    createSystemErrorTerminal(container);
+                    glitchOverlay.classList.add('active');
+                    break;
+                case 'corruption':
+                    createCorruptionTerminal(container);
+                    createCorruptionRain(container);
+                    glitchOverlay.classList.add('active');
+                    break;
+                case 'revelation':
+                    const light = document.createElement('div');
+                    light.className = 'reveal-light';
+                    container.appendChild(light);
+                    break;
+                case 'geometric':
+                    createGeometricShapes(container);
+                    break;
+                case 'mind-waves':
+                    createMindWaves(container);
+                    break;
+                case 'spiral':
+                    createSpiralWaves(container);
+                    break;
+                case 'enlightenment':
+                    createEnlightenmentEffect(container);
+                    break;
+                case 'choice-ambient':
+                    createChoiceAmbient(container);
+                    break;
+            }
+        }
+
+        function createCorruptionRain(container) {
+            const rainDiv = document.createElement('div');
+            rainDiv.className = 'corruption-rain';
+            
+            const codes = [
+                'ERROR', 'FAIL', 'NULL', 'FALSE', '0x00',
+                'CORRUPT', 'INVALID', 'VOID', 'BREAK',
+                'CRASH', 'ABORT', 'KILL', 'TERMINATE'
+            ];
+            
+            for (let i = 0; i < 20; i++) {
+                const column = document.createElement('div');
+                column.className = 'corruption-column';
+                column.style.left = (i * 5) + '%';
+                column.style.animationDuration = (2 + Math.random() * 2) + 's';
+                column.style.animationDelay = Math.random() * 1 + 's';
+                
+                let text = '';
+                for (let j = 0; j < 10; j++) {
+                    text += codes[Math.floor(Math.random() * codes.length)] + '\n';
+                }
+                column.textContent = text;
+                rainDiv.appendChild(column);
+            }
+            
+            container.appendChild(rainDiv);
+        }
+
+        function createModernConfetti(container) {
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'absolute';
+                confetti.style.width = Math.random() * 15 + 5 + 'px';
+                confetti.style.height = confetti.style.width;
+                confetti.style.background = `linear-gradient(135deg, 
+                    hsl(${Math.random() * 360}, 100%, 60%),
+                    hsl(${Math.random() * 360}, 100%, 50%))`;
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-20px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.animation = `fall ${2 + Math.random() * 2}s linear`;
+                confetti.style.opacity = Math.random() * 0.5 + 0.5;
+                confetti.style.boxShadow = '0 0 10px currentColor';
+                container.appendChild(confetti);
+            }
+        }
+
+        function createFloatingParticles(container) {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animation = `floatParticle ${3 + Math.random() * 2}s ease-in-out infinite`;
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.color = `hsl(${Math.random() * 60 + 200}, 100%, 70%)`;
+                container.appendChild(particle);
+            }
+        }
+
+        function createGeometricShapes(container) {
+            const shapes = ['circle', 'square', 'triangle'];
+            for (let i = 0; i < 8; i++) {
+                const shape = document.createElement('div');
+                shape.className = 'geo-shape';
+                const size = Math.random() * 100 + 50;
+                shape.style.width = size + 'px';
+                shape.style.height = size + 'px';
+                
+                const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+                if (shapeType === 'circle') {
+                    shape.style.borderRadius = '50%';
+                } else if (shapeType === 'triangle') {
+                    shape.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+                }
+                
+                shape.style.left = Math.random() * 100 + '%';
+                shape.style.top = Math.random() * 100 + '%';
+                shape.style.animationDuration = (15 + Math.random() * 10) + 's';
+                shape.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(shape);
+            }
+        }
+
+        function createMindWaves(container) {
+            for (let i = 0; i < 6; i++) {
+                const wave = document.createElement('div');
+                wave.style.position = 'absolute';
+                wave.style.width = '150px';
+                wave.style.height = '150px';
+                wave.style.border = '3px solid rgba(139, 92, 246, 0.6)';
+                wave.style.borderRadius = '50%';
+                wave.style.left = '50%';
+                wave.style.top = '50%';
+                wave.style.transform = 'translate(-50%, -50%)';
+                wave.style.animation = `expandFade ${4 + i * 0.5}s ease-out infinite`;
+                wave.style.animationDelay = i * 0.8 + 's';
+                container.appendChild(wave);
+            }
+        }
+
+        function createSpiralWaves(container) {
+            for (let i = 0; i < 3; i++) {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.style.position = 'absolute';
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.opacity = 0.3 - i * 0.1;
+                
+                let path = 'M100 100';
+                for (let j = 0; j < 720; j += 5) {
+                    const angle = j * Math.PI / 180;
+                    const radius = (j / 720) * (300 + i * 100);
+                    const x = 100 + radius * Math.cos(angle);
+                    const y = 100 + radius * Math.sin(angle);
+                    path += ` L${x} ${y}`;
+                }
+                
+                svg.innerHTML = `
+                    <path d="${path}" fill="none" stroke="rgba(139, 92, 246, 0.8)" stroke-width="2">
+                        <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze"/>
+                    </path>
+                `;
+                
+                container.appendChild(svg);
+            }
+        }
+
+        function createEnlightenmentEffect(container) {
+            const light = document.createElement('div');
+            light.className = 'reveal-light';
+            container.appendChild(light);
+            
+            createFloatingParticles(container);
+            
+            for (let i = 0; i < 12; i++) {
+                const ray = document.createElement('div');
+                ray.style.position = 'absolute';
+                ray.style.width = '4px';
+                ray.style.height = '200px';
+                ray.style.background = 'linear-gradient(to bottom, rgba(255,255,255,0.8), transparent)';
+                ray.style.left = '50%';
+                ray.style.top = '50%';
+                ray.style.transformOrigin = 'top center';
+                ray.style.transform = `translate(-50%, -50%) rotate(${i * 30}deg)`;
+                ray.style.animation = 'rayPulse 2s ease-in-out infinite';
+                ray.style.animationDelay = i * 0.1 + 's';
+                container.appendChild(ray);
+            }
+        }
+
+        function createChoiceAmbient(container) {
+            createGeometricShapes(container);
+        }
+
+        function createAmbientParticles() {
+            const system = document.getElementById('particleSystem');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animation = `floatParticle ${5 + Math.random() * 5}s ease-in-out infinite`;
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.width = Math.random() * 3 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                system.appendChild(particle);
+            }
+        }
+
+        function showChoiceButtons(container) {
+            const choiceDiv = document.createElement('div');
+            choiceDiv.className = 'choice-container';
+            
+            const choices = [
+                {
+                    icon: createChoiceIcon('restart'),
+                    title: 'Chơi lại từ đầu',
+                    desc: 'Vòng xoáy ốc tiếp tục - Mỗi lần chơi là một tầng cao hơn',
+                    action: 'restart'
+                },
+                {
+                    icon: createChoiceIcon('accept'),
+                    title: 'Chấp nhận sự thật',
+                    desc: 'Trở thành Giác Ngộ Giả thực sự - Hiểu rằng học tập là hành trình',
+                    action: 'accept'
+                },
+                {
+                    icon: createChoiceIcon('exit'),
+                    title: 'Thoát game',
+                    desc: 'Áp dụng bài học vào thế giới thực - Nơi vòng xoáy ốc thực sự',
+                    action: 'exit'
+                }
+            ];
+            
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `
+                    <span class="choice-icon">${choice.icon}</span>
+                    <span>
+                        <strong>${choice.title}</strong>
+                        <span class="choice-label">${choice.desc}</span>
+                    </span>
+                `;
+                btn.onclick = () => handleChoice(choice.action);
+                choiceDiv.appendChild(btn);
+            });
+            
+            container.appendChild(choiceDiv);
+        }
+
+        function createChoiceIcon(type) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '40');
+            svg.setAttribute('height', '40');
+            svg.setAttribute('viewBox', '0 0 40 40');
+            
+            switch(type) {
+                case 'restart':
+                    svg.innerHTML = `
+                        <path d="M20 5 A15 15 0 1 1 5 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        <polygon points="20,5 15,0 15,10" fill="currentColor"/>
+                    `;
+                    break;
+                case 'accept':
+                    svg.innerHTML = `
+                        <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <path d="M12 20 L18 26 L28 14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    `;
+                    break;
+                case 'exit':
+                    svg.innerHTML = `
+                        <rect x="5" y="10" width="20" height="25" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M15 10 L15 5 L35 5 L35 35 L25 35" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M28 20 L35 20 M32 17 L35 20 L32 23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    `;
+                    break;
+            }
+            
+            return svg.outerHTML;
+        }
+
+        function handleChoice(choice) {
+            const container = document.getElementById('twistContainer');
+            const text = document.getElementById('sceneText');
+            const fadeEl = document.getElementById('fadeTransition');
+            
+            document.getElementById('choiceContainer').style.opacity = '0';
+            
+            fadeEl.classList.remove('hidden');
+            
+            setTimeout(() => {
+                switch(choice) {
+                    case 'restart':
+                        text.innerHTML = '';
+                        typeText(text, 'Bạn đã chọn tiếp tục hành trình\nVòng xoáy ốc tri thức\nchưa bao giờ kết thúc...', 70);
+                        setTimeout(() => {
+                            alert('🔄 Game sẽ restart!\n\n(Trong game thật: reload game về Lớp 1 nhưng với player memory được giữ lại - New Game+ mode)');
+                        }, 8500);
+                        break;
+                        
+                    case 'accept':
+                        text.innerHTML = '';
+                        typeText(text, 'Chúc mừng!\nBạn đã thực sự trở thành\nGiác Ngộ Giả', 60);
+                        setTimeout(() => {
+                            typeText(text, '\n\n"Tri thức thực sự không đo bằng bằng cấp\nmà bằng khả năng không ngừng học hỏi"', 50);
+                        }, 5000);
+                        setTimeout(() => {
+                            alert('🏆 GAME COMPLETED!\n\nBạn đã hoàn thành hành trình và đạt được giác ngộ thực sự.');
+                        }, 12000);
+                        break;
+                        
+                    case 'exit':
+                        text.innerHTML = '';
+                        typeText(text, 'Bạn đã chọn rời khỏi game\nNhưng nhớ rằng:\nHọc tập trong đời thực\ncũng là một vòng xoáy ốc...', 60);
+                        setTimeout(() => {
+                            alert('💙 Cảm ơn bạn đã chơi "Con Đường Học Vấn"!\n\nNhớ rằng: Trong cuộc sống, việc học không bao giờ kết thúc.');
+                        }, 10000);
+                        break;
+                }
+                
+                fadeEl.classList.add('hidden');
+            }, 2000);
+        }
+
+        function nextScene() {
+            if (currentScene < twistScenes.length - 1) {
+                showScene(currentScene + 1);
+            }
+        }
+
+        // Add custom animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes floatParticle {
+                0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+                50% { transform: translate(20px, -20px); opacity: 1; }
+            }
+            @keyframes expandFade {
+                0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(8); opacity: 0; }
+            }
+            @keyframes rayPulse {
+                0%, 100% { opacity: 0.3; }
+                50% { opacity: 1; }
+            }
+            @keyframes fall {
+                to { transform: translateY(100vh) rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
