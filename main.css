@@ -623,3 +623,21 @@ button {
     font-size: 16px;
     color: #7f8c8d;
 }
+
+/* Test Mode Indicator */
+#test-mode-indicator {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-family: monospace;
+    z-index: 999;
+    border: 2px solid #ffd700;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    display: none;
+    min-width: 200px;
+    text-align: left;
+}

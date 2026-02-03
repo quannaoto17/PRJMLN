@@ -22,7 +22,7 @@ let pillarMoving = false;
 let pillarMoveInterval = null;
 let pillarMoveDirection = 1; // 1: sang phải, -1: sang trái
 let pillarMoveSpeed = 0;
-let maxBridgeLength = 300; // Giới hạn chiều dài cầu
+let maxBridgeLength = 350; // Giới hạn chiều dài cầu
 let bridgeGrowthDirection = 1; // 1: tăng, -1: giảm
 
 // Quản lý các cột đã qua
@@ -38,6 +38,10 @@ let lastDeathLevel = 0; // Level cuối cùng chết
 // Hệ thống mạng (lives)
 let lives = 5; // Số mạng còn lại
 const maxLives = 5; // Tối đa 5 mạng mỗi màn
+
+// TEST MODE
+let testMode = false;
+let infiniteLives = false;
 
 // Cấu trúc chương học
 const chapters = [
@@ -539,6 +543,46 @@ window.addEventListener("mousedown", () => {
 
 // Xử lý sự kiện nhấn phím Space để Tích lũy Lượng
 window.addEventListener("keydown", (e) => {
+  // TEST MODE SHORTCUTS
+  if (e.key === 't' || e.key === 'T') {
+    testMode = !testMode;
+    updateTestModeDisplay();
+    console.log(`🔧 TEST MODE: ${testMode ? 'ON ✅' : 'OFF ❌'}`);
+    return;
+  }
+  
+  if (testMode) {
+    // Skip to level (1-9)
+    if (e.key >= '1' && e.key <= '9') {
+      const targetLevel = parseInt(e.key);
+      if (targetLevel <= 16) {
+        skipToLevel(targetLevel);
+        return;
+      }
+    }
+    
+    // Toggle infinite lives
+    if (e.key === 'i' || e.key === 'I') {
+      infiniteLives = !infiniteLives;
+      if (infiniteLives) {
+        lives = 999;
+        updateLivesDisplay();
+      }
+      console.log(`💖 INFINITE LIVES: ${infiniteLives ? 'ON ✅' : 'OFF ❌'}`);
+      updateTestModeDisplay();
+      return;
+    }
+    
+    // Next level
+    if (e.key === 'n' || e.key === 'N') {
+      if (currentLevelNum < 16) {
+        skipToLevel(currentLevelNum + 1);
+      }
+      return;
+    }
+  }
+  
+  // Space key for bridge building
   if (e.code !== "Space") return;
   e.preventDefault(); // Ngăn scroll trang
   
@@ -708,13 +752,11 @@ function successLeap() {
       return;
     }
 
-    // Kiểm tra thắng game (hoàn thành Đại học)
+    // Kiểm tra thắng game (hoàn thành Đại học) → Chuyển thẳng sang twist.html
     if (currentLevelNum > 16) {
-      showResult(
-        "TỐT NGHIỆP ĐẠI HỌC!",
-        "Chúc mừng! Bạn đã hoàn thành tất cả 16 cấp độ và tốt nghiệp Đại học với thành tích xuất sắc!",
-      );
-      isAnimating = false;
+      setTimeout(() => {
+        window.location.href = "twist.html";
+      }, 500);
       return;
     }
 
@@ -1209,6 +1251,99 @@ function showDialogueNotification(text) {
 }
 
 // Hàm bắt đầu game từ main menu
+// TEST MODE FUNCTIONS
+function skipToLevel(levelNum) {
+  if (levelNum < 1 || levelNum > 16) return;
+  console.log(`⏭️ Skipping to Level ${levelNum}`);
+  currentLevelNum = levelNum;
+  lives = maxLives;
+  updateLivesDisplay();
+  nextTurn();
+}
+
+function updateTestModeDisplay() {
+  let indicator = document.getElementById('test-mode-indicator');
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.id = 'test-mode-indicator';
+    document.body.appendChild(indicator);
+  }
+  
+  if (testMode) {
+    indicator.innerHTML = `
+      <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">🔧 TEST MODE</div>
+      <div style="font-size: 11px; line-height: 1.4;">
+        T: Toggle | 1-9: Jump Level<br>
+        N: Next Level | I: Infinite Lives
+      </div>
+    `;
+    indicator.style.display = 'block';
+  } else {
+    indicator.style.display = 'none';
+  }
+}
+
+// ===== TEST MODE FUNCTIONS =====
+function skipToLevel(levelNum) {
+  if (levelNum < 1 || levelNum > 16) return;
+  console.log(`⏭️ TEST MODE: Skipping to Level ${levelNum}`);
+  
+  // Reset tất cả overlays
+  msgOverlay.classList.add("hidden");
+  quizOverlay.classList.add("hidden");
+  const tutorialOverlay = document.getElementById("tutorial-overlay");
+  if (tutorialOverlay) tutorialOverlay.classList.add("hidden");
+  const leapOverlay = document.getElementById("leap-complete-overlay");
+  if (leapOverlay) leapOverlay.remove();
+  
+  // Reset game state
+  isAnimating = false;
+  isHolding = false;
+  isTutorialActive = false;
+  
+  // Set level
+  currentLevelNum = levelNum;
+  currentLevel = currentLevelNum - 1;
+  
+  // Reset lives if not infinite
+  if (!infiniteLives) {
+    lives = maxLives;
+    updateLivesDisplay();
+  }
+  
+  // Reset bridge
+  bridgeLength = 0;
+  bridge.style.height = "0px";
+  bridge.style.opacity = "1";
+  
+  // Start new turn
+  nextTurn();
+}
+
+function updateTestModeDisplay() {
+  let indicator = document.getElementById('test-mode-indicator');
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.id = 'test-mode-indicator';
+    document.body.appendChild(indicator);
+  }
+  
+  if (testMode) {
+    indicator.innerHTML = `
+      <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #ffd700;">🔧 TEST MODE ACTIVE</div>
+      <div style="font-size: 12px; line-height: 1.6;">
+        <strong>T</strong>: Toggle Test Mode<br>
+        <strong>1-9</strong>: Jump to Level<br>
+        <strong>N</strong>: Next Level<br>
+        <strong>I</strong>: Infinite Lives ${infiniteLives ? '✅' : '❌'}
+      </div>
+    `;
+    indicator.style.display = 'block';
+  } else {
+    indicator.style.display = 'none';
+  }
+}
+
 function startGame() {
   document.getElementById("main-menu").classList.add("hidden");
   document.getElementById("game-container").classList.remove("hidden");
