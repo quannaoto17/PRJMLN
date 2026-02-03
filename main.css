@@ -1,3 +1,5 @@
+/* FILE: main.css */
+
 body {
     margin: 0;
     overflow: hidden;
@@ -13,6 +15,8 @@ body {
     justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    z-index: 100;
 }
 
 .menu-content {
@@ -152,11 +156,56 @@ body {
 }
 
 #game-container {
+    position: relative;
     width: 100vw;
     height: 100vh;
-    position: relative;
-    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    overflow: hidden;
 }
+
+/* LỚP NỀN CHUNG */
+#game-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    transform: scale(1.1); /* tránh viền trắng do blur */
+    z-index: 0;
+}
+
+/* GAME CONTENT */
+#game-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ===== BACKGROUND THEO TỪNG CẤP HỌC ===== */
+/* Tiểu Học Cơ Sở (Level 1-5) */
+#game-container.bg-chapter-0::before {
+    background-image: url("assets/background/primary.png");
+}
+
+
+/* Trung Học Cơ Sở (Level 6-9) */
+#game-container.bg-chapter-1::before {
+    background-image: url("assets/background/secondary.png");
+}
+
+
+/* Trung Học Phổ Thông (Level 10-12) */
+#game-container.bg-chapter-2::before {
+    background-image: url("assets/background/highschool.png");
+}
+
+
+/* Đại Học (Level 13-16) - Hell Mode */
+#game-container.bg-chapter-3::before {
+    background-image: url("assets/background/university.png");
+}
+
+/* ===== KẾT THÚC BACKGROUND ===== */
 
 #ui-layer {
     position: absolute;
