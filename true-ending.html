@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giác Ngộ Thực Sự - Con Đường Học Vấn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, 
+                #1a0b2e 0%, 
+                #2d1b69 30%, 
+                #4a3b8c 70%, 
+                #6d5bbf 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            z-index: 10;
+        }
+
+        /* Aurora effect */
+        .aurora {
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 50% 20%, rgba(6, 182, 212, 0.3) 0%, transparent 50%);
+            animation: auroraFloat 20s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes auroraFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-5%, 5%) rotate(1deg); }
+            66% { transform: translate(5%, -5%) rotate(-1deg); }
+        }
+
+        .main-title {
+            font-size: 5em;
+            margin-bottom: 30px;
+            font-weight: 900;
+            text-shadow: 
+                0 0 30px rgba(255, 255, 255, 0.8),
+                0 0 60px rgba(139, 92, 246, 0.6),
+                0 0 90px rgba(59, 130, 246, 0.4);
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 30px rgba(255, 255, 255, 0.8),
+                    0 0 60px rgba(139, 92, 246, 0.6),
+                    0 0 90px rgba(59, 130, 246, 0.4);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 40px rgba(255, 255, 255, 1),
+                    0 0 80px rgba(139, 92, 246, 0.8),
+                    0 0 120px rgba(59, 130, 246, 0.6),
+                    0 0 160px rgba(6, 182, 212, 0.4);
+            }
+        }
+
+        .subtitle {
+            font-size: 2em;
+            margin-bottom: 50px;
+            color: #e0e7ff;
+            max-width: 800px;
+            line-height: 1.6;
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        .enlightenment-icon {
+            font-size: 120px;
+            margin: 40px 0;
+            animation: enlightenmentPulse 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
+        }
+
+        @keyframes enlightenmentPulse {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1;
+            }
+            25% { 
+                transform: scale(1.1) rotate(5deg); 
+                opacity: 0.9;
+            }
+            50% { 
+                transform: scale(1) rotate(-5deg); 
+                opacity: 1;
+            }
+            75% { 
+                transform: scale(1.1) rotate(5deg); 
+                opacity: 0.9;
+            }
+        }
+
+        .achievements-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 40px 0;
+            max-width: 900px;
+            width: 100%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .achievement-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #a78bfa;
+            font-weight: 700;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .achievement-item {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .achievement-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .achievement-name {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #c4b5fd;
+        }
+
+        .achievement-desc {
+            color: #94a3b8;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .philosophy-quote {
+            max-width: 800px;
+            margin: 50px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, 
+                rgba(139, 92, 246, 0.1), 
+                rgba(59, 130, 246, 0.1));
+            border-radius: 20px;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-quote::before {
+            content: "❝";
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 4em;
+            opacity: 0.3;
+            color: #a78bfa;
+        }
+
+        .philosophy-quote::after {
+            content: "❞";
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 4em;
+            opacity: 0.3;
+            color: #a78bfa;
+        }
+
+        .quote-text {
+            font-size: 1.5em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #e0e7ff;
+        }
+
+        .quote-author {
+            font-size: 1.2em;
+            color: #a78bfa;
+            font-weight: 600;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 20px 50px;
+            font-size: 1.3em;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 250px;
+            justify-content: center;
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+            color: white;
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-share:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-restart {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-restart:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .btn-menu {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-menu:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        /* Golden particles */
+        .golden-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #FFD700;
+            animation: goldenFall linear forwards;
+            z-index: 2;
+        }
+
+        @keyframes goldenFall {
+            to {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        /* Wisdom text reveal */
+        .wisdom-reveal {
+            font-size: 1.8em;
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: wisdomAppear 2s ease-out 2s forwards;
+        }
+
+        @keyframes wisdomAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Credits roll */
+        .credits {
+            margin-top: 60px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            animation: creditsScroll 60s linear infinite;
+        }
+
+        @keyframes creditsScroll {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+
+        .credit-item {
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: #cbd5e1;
+        }
+
+        .credit-title {
+            font-size: 1.3em;
+            color: #a78bfa;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 3em; }
+            .subtitle { font-size: 1.5em; }
+            .enlightenment-icon { font-size: 80px; }
+            .achievement-grid { grid-template-columns: 1fr; }
+            .action-btn { min-width: 100%; }
+            .philosophy-quote { padding: 20px; }
+            .quote-text { font-size: 1.2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="aurora"></div>
+    
+    <div class="container">
+        <div class="enlightenment-icon">🌟</div>
+        
+        <h1 class="main-title">GIÁC NGỘ THỰC SỰ</h1>
+        
+        <p class="subtitle">
+            "Tri thức thực sự không đo bằng bằng cấp,<br>
+            mà bằng khả năng không ngừng học hỏi và thay đổi"
+        </p>
+
+        <div class="achievements-container">
+            <h2 class="achievement-title">THÀNH TỰU ĐẠT ĐƯỢC</h2>
+            
+            <div class="achievement-grid">
+                <div class="achievement-item">
+                    <div class="achievement-icon">🎓</div>
+                    <h3 class="achievement-name">Tốt Nghiệp Ảo</h3>
+                    <p class="achievement-desc">Hoàn thành 16 cấp độ từ Tiểu học đến Đại học trong thế giới ảo</p>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🧠</div>
+                    <h3 class="achievement-name">Giác Ngộ Thực</h3>
+                    <p class="achievement-desc">Nhận ra sự thật về hành trình học tập không bao giờ kết thúc</p>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">⚖️</div>
+                    <h3 class="achievement-name">Cân Bằng Biện Chứng</h3>
+                    <p class="achievement-desc">Hiểu sâu sắc về Lượng - Chất, Tả Khuynh - Hữu Khuynh</p>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">♾️</div>
+                    <h3 class="achievement-name">Vòng Xoáy Vô Tận</h3>
+                    <p class="achievement-desc">Nhận thức được học tập là vòng xoáy ốc không điểm dừng</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="philosophy-quote">
+            <p class="quote-text">
+                Người thông minh học từ kinh nghiệm của mình.<br>
+                Người khôn ngoan học từ kinh nghiệm của người khác.<br>
+                Nhưng người giác ngộ hiểu rằng mọi kinh nghiệm đều chỉ là<br>
+                những vòng xoáy trong dòng chảy vô tận của tri thức.
+            </p>
+            <p class="quote-author">— Trí tuệ phương Đông</p>
+        </div>
+
+        <div class="wisdom-reveal">
+            Bạn đã hoàn thành hành trình. Nhưng hãy nhớ:<br>
+            <strong>Sự kết thúc của trò chơi chỉ là sự khởi đầu của hành trình thực sự.</strong>
+        </div>
+
+        <div class="buttons-container">
+            <button class="action-btn btn-share" onclick="shareAchievement()">
+                📢 CHIA SẺ THÀNH TỰU
+            </button>
+            <button class="action-btn btn-restart" onclick="startNewJourney()">
+                🌀 HÀNH TRÌNH MỚI
+            </button>
+            <button class="action-btn btn-menu" onclick="returnToMenu()">
+                🏠 VỀ MENU CHÍNH
+            </button>
+        </div>
+
+        <div class="credits">
+            <div class="credit-item">
+                <div class="credit-title">TRÒ CHƠI "CON ĐƯỜNG HỌC VẤN"</div>
+                Đã hoàn thành
+            </div>
+            <div class="credit-item">
+                <div class="credit-title">THÔNG ĐIỆP</div>
+                Học tập là hành trình, không phải đích đến
+            </div>
+            <div class="credit-item">
+                <div class="credit-title">TRIẾT LÝ CỐT LÕI</div>
+                Quy luật Lượng - Chất | Vòng xoáy ốc tri thức
+            </div>
+            <div class="credit-item">
+                <div class="credit-title">LỜI KHUYÊN CHO HÀNH TRÌNH THẬT</div>
+                Luôn tò mò, luôn học hỏi, luôn thay đổi
+            </div>
+            <div class="credit-item">
+                <div class="credit-title">CẢM ƠN BẠN ĐÃ CHƠI</div>
+                Mong bạn tìm thấy niềm vui trong học tập thực sự
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create golden particles (like golden rain)
+        function createGoldenRain() {
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'golden-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '-10px';
+                    particle.style.animationDuration = (3 + Math.random() * 4) + 's';
+                    particle.style.animationDelay = Math.random() * 2 + 's';
+                    particle.style.width = particle.style.height = (Math.random() * 4 + 3) + 'px';
+                    
+                    document.body.appendChild(particle);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 7000);
+                }, i * 100);
+            }
+        }
+
+        // Create additional sparkles
+        function createSparkles() {
+            setInterval(() => {
+                const sparkle = document.createElement('div');
+                sparkle.style.position = 'absolute';
+                sparkle.style.width = '20px';
+                sparkle.style.height = '20px';
+                sparkle.style.background = 'radial-gradient(circle, #FFD700, transparent)';
+                sparkle.style.borderRadius = '50%';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.opacity = '0';
+                sparkle.style.animation = 'sparkleTwinkle 1.5s ease-in-out';
+                
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => sparkle.remove(), 1500);
+            }, 500);
+        }
+
+        // Button functions
+        function shareAchievement() {
+            const text = "Tôi vừa đạt được Giác Ngộ Thực Sự trong trò chơi 'Con Đường Học Vấn'! 🎓✨\n\n" +
+                        "Học tập không phải là đích đến, mà là hành trình không ngừng nghỉ. " +
+                        "Hãy cùng khám phá triết lý Lượng - Chất qua trò chơi này!";
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Giác Ngộ Thực Sự - Con Đường Học Vấn',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                alert("Chia sẻ thành tựu của bạn:\n\n" + text + "\n\nURL: " + window.location.href);
+            }
+        }
+
+        function startNewJourney() {
+            // Fade out effect
+            document.body.style.animation = 'fadeOut 1s forwards';
+            
+            setTimeout(() => {
+                // Start new game with enlightenment flag
+                localStorage.setItem('enlightened_player', 'true');
+                window.location.href = 'index.html?enlightened=true';
+            }, 1000);
+        }
+
+        function returnToMenu() {
+            document.body.style.animation = 'fadeOut 1s forwards';
+            
+            setTimeout(() => {
+                window.location.href = 'intro.html';
+            }, 1000);
+        }
+
+        // Initialize effects
+        window.addEventListener('load', () => {
+            createGoldenRain();
+            createSparkles();
+            
+            // Play victory sound if available
+            try {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3');
+                audio.volume = 0.3;
+                audio.play().catch(e => console.log("Audio play failed:", e));
+            } catch (e) {}
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 's' || e.key === 'S') shareAchievement();
+                if (e.key === 'Enter') startNewJourney();
+                if (e.key === 'Escape') returnToMenu();
+            });
+            
+            // Add sparkle animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes sparkleTwinkle {
+                    0%, 100% { opacity: 0; transform: scale(0); }
+                    50% { opacity: 1; transform: scale(1); }
+                }
+                
+                @keyframes fadeOut {
+                    to { opacity: 0; }
+                }
+                
+                .container > * {
+                    animation: fadeInUp 1s ease-out forwards;
+                    opacity: 0;
+                }
+                
+                @keyframes fadeInUp {
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Stagger animations
+            const elements = document.querySelectorAll('.container > *');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = (index * 0.3) + 's';
+                el.style.transform = 'translateY(30px)';
+            });
+        });
+    </script>
+</body>
+</html>
