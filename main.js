@@ -923,14 +923,15 @@ function handleRetry() {
     
     // Kiểm tra hết mạng → THÔI HỌC
     if (lives <= 0) {
-        showResult(
-            "⛔ THÔI HỌC!", 
-            "Bạn đã hết mạng! Phải bắt đầu lại từ đầu."
-        );
-        // Đặt flag để reset game khi click
-        setTimeout(() => {
-            resetGame();
-        }, 100);
+        // Lưu thông tin để hiển thị trên màn hình game over
+        const gameOverData = {
+            level: currentLevelNum,
+            attempts: deathCount,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Chuyển sang màn hình game over với thông tin
+        window.location.href = `game-over.html?level=${currentLevelNum}&attempts=${deathCount}`;
         return;
     }
     
