@@ -69,9 +69,9 @@ const levels = [
 
   // Đại Học (Hell Mode) - Chất cao cấp, yêu cầu sự tự giác tuyệt đối
   { name: "Năm 1", icon: "🎓", pillarWidth: 40, gap: 240 },
-  { name: "Năm 2", icon: "🎓", pillarWidth: 35, gap: 260 },
-  { name: "Năm 3", icon: "🎓", pillarWidth: 30, gap: 280 },
-  { name: "Năm 4", icon: "🎓", pillarWidth: 25, gap: 300 },
+  { name: "Năm 2", icon: "🎓", pillarWidth: 35, gap: 250 },
+  { name: "Năm 3", icon: "🎓", pillarWidth: 30, gap: 260 },
+  { name: "Năm 4", icon: "🎓", pillarWidth: 25, gap: 270 },
 ];
 
 let currentLevel = 0;
@@ -648,15 +648,16 @@ function dropBridge() {
 function checkLeap() {
   const gap = levels[currentLevel].gap;
   const pWidth = levels[currentLevel].pillarWidth;
+  const actualBridgeLength = bridgeLength - 7; // Trừ 5px cho khoảng bị lùi vào
 
   // Khoảng cách Điểm nút: từ gap đến (gap + pWidth)
-  if (bridgeLength < gap) {
+  if (actualBridgeLength < gap) {
     showResult(
       "SAI LẦM TẢ KHUYNH",
       "Bạn quá nôn nóng! Lượng chưa tích lũy đủ đến Điểm Nút đã đòi thực hiện bước nhảy.",
     );
     isAnimating = false;
-  } else if (bridgeLength > gap + pWidth) {
+  } else if (actualBridgeLength > gap + pWidth) {
     showResult(
       "SAI LẦM HỮU KHUYNH",
       "Bạn quá bảo thủ! Lượng đã thừa nhưng bạn không nắm bắt Điểm Nút để thực hiện bước nhảy đúng lúc.",
@@ -972,13 +973,11 @@ function handleRetry() {
 
   console.log(`❤️ Còn ${lives} mạng`);
 
-  // Kiểm tra hết mạng → THÔI HỌC
+  // Kiểm tra hết mạng → Chuyển nhanh sang game-over.html
   if (lives <= 0) {
-    showResult("⛔ THÔI HỌC!", "Bạn đã hết mạng! Phải bắt đầu lại từ đầu.");
-    // Đặt flag để reset game khi click
     setTimeout(() => {
-      resetGame();
-    }, 100);
+      window.location.href = "game-over.html";
+    }, 300);
     return;
   }
 
@@ -1237,10 +1236,11 @@ function initGame() {
   if (fromIntro === 'true') {
     sessionStorage.removeItem('from_intro');
     isAnimating = true; // Khóa game ngay để tránh click trước tutorial
+    isHolding = false; // Đảm bảo không xây cầu
     nextTurn();
     setTimeout(() => {
       startTutorial('level1');
-    }, 300); // Giảm từ 1000ms xuống 300ms
+    }, 100); // Giảm xuống 100ms để tutorial hiện nhanh hơn
   } else {
     nextTurn();
   }
