@@ -1585,3 +1585,37 @@ function continueGame() {
 }
 
 // Không tự động khởi tạo game khi load trang
+
+// Kiểm tra New Game+ mode
+function checkNewGamePlus() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isNewGamePlus = urlParams.get('newgameplus') === 'true' || 
+                         localStorage.getItem('new_game_plus') === 'true';
+    
+    if (isNewGamePlus) {
+        // New Game+ features
+        console.log("🎮 NEW GAME+ MODE ACTIVATED!");
+        
+        // Tăng độ khó cơ bản
+        levels.forEach((level, index) => {
+            level.gap += 20; // Tăng khoảng cách
+            if (level.pillarWidth > 25) {
+                level.pillarWidth -= 5; // Thu hẹp cột
+            }
+        });
+        
+        // Thêm tính năng di chuyển cột cho nhiều level hơn
+        const movingLevels = [3, 4, 6, 7, 8, 10, 11, 13, 14, 15];
+        window.getPillarMoveSpeed = function() {
+            if (movingLevels.includes(currentLevelNum)) {
+                return 0.8 + (currentLevelNum * 0.1);
+            }
+            return 0;
+        };
+        
+        // Hiển thị thông báo
+        setTimeout(() => {
+            showDialogueNotification("🌀 NEW GAME+ MODE\n\nĐộ khó đã được tăng cường!\nCác cột di chuyển nhanh hơn,\nkhoảng cách biến động mạnh hơn.\n\nSử dụng kinh nghiệm từ vòng trước!");
+        }, 2000);
+    }
+}

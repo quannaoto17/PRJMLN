@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thất Bại - Con Đường Học Vấn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .game-over-container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            margin: auto;
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main title */
+        .game-over-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titlePulse 2s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+        }
+
+        @keyframes titlePulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.05);
+                filter: brightness(1.2);
+            }
+        }
+
+        /* Philosophical quote */
+        .philosophy-quote {
+            font-size: 20px;
+            line-height: 1.5;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #ef4444;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            font-style: italic;
+            color: #e0e7ff;
+        }
+
+        .quote-author {
+            margin-top: 12px;
+            font-size: 16px;
+            color: #94a3b8;
+            font-style: normal;
+        }
+
+        /* Stats section */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 18px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ef4444;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Lesson learned section */
+        .lesson-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border-radius: 16px;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        /* Custom scrollbar cho lesson section */
+        .lesson-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .lesson-section::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .lesson-section::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 10px;
+        }
+
+        .lesson-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        .lesson-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #a78bfa;
+        }
+
+        .lesson-text {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #cbd5e1;
+        }
+
+        /* Button container */
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-menu {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-menu:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-5px);
+        }
+
+        /* Broken heart icon */
+        .broken-heart {
+            font-size: 80px;
+            margin: 15px 0;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.1);
+            }
+            50% {
+                transform: scale(1);
+            }
+        }
+
+        /* Progress bar */
+        .progress-section {
+            margin: 20px 0;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 100%);
+            border-radius: 8px;
+            transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Stagger animation delays */
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        .delay-4 { animation-delay: 0.8s; }
+        .delay-5 { animation-delay: 1s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .game-over-title {
+                font-size: 40px;
+            }
+
+            .philosophy-quote {
+                font-size: 16px;
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .action-btn {
+                padding: 14px 35px;
+                font-size: 16px;
+            }
+
+            .broken-heart {
+                font-size: 60px;
+            }
+
+            .lesson-section {
+                padding: 20px;
+                max-height: 250px;
+            }
+
+            .lesson-title {
+                font-size: 18px;
+            }
+
+            .lesson-text {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-height: 800px) {
+            .game-over-container {
+                padding: 20px 0;
+            }
+
+            .broken-heart {
+                font-size: 60px;
+                margin: 10px 0;
+            }
+
+            .game-over-title {
+                font-size: 48px;
+                margin-bottom: 15px;
+            }
+
+            .philosophy-quote {
+                margin: 20px 0;
+                padding: 15px;
+                font-size: 18px;
+            }
+
+            .lesson-section {
+                max-height: 200px;
+                margin: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="game-over-container">
+        <div class="broken-heart fade-in">💔</div>
+        
+        <h1 class="game-over-title fade-in delay-1">HẾT MẠNG</h1>
+
+        <div class="philosophy-quote fade-in delay-2">
+            "Thất bại không phải là sự phủ định tuyệt đối,<br>
+            mà là một phần của quá trình tích lũy LƯỢNG<br>
+            để đạt tới bước nhảy CHẤT tiếp theo"
+            <div class="quote-author">— Quy luật Lượng - Chất</div>
+        </div>
+
+        <div class="stats-container fade-in delay-3">
+            <div class="stat-card">
+                <div class="stat-label">Cấp độ đạt được</div>
+                <div class="stat-value" id="level-reached">5</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Lần thử</div>
+                <div class="stat-value" id="attempts">12</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Mạng đã dùng</div>
+                <div class="stat-value">5 / 5</div>
+            </div>
+        </div>
+
+        <div class="progress-section fade-in delay-3">
+            <div class="progress-label">Tiến độ hoàn thành</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text"><span id="progress-percent">0</span>% / 100%</div>
+        </div>
+
+        <div class="lesson-section fade-in delay-4">
+            <div class="lesson-title">🎓 BÀI HỌC TRIẾT HỌC</div>
+            <div class="lesson-text" id="lesson-text">
+                Bạn đã trải nghiệm sự khác biệt giữa <strong>Tả Khuynh</strong> (vội vàng, thiếu kiên nhẫn) 
+                và <strong>Hữu Khuynh</strong> (chậm trễ, bảo thủ). 
+                Con đường học vấn đòi hỏi sự cân bằng: 
+                <strong>tích lũy đủ lượng, nắm bắt đúng thời điểm</strong> để thực hiện bước nhảy chất.
+                <br><br>
+                Mỗi lần thất bại là một bài học quý giá. Hãy thử lại với sự kiên nhẫn và chính xác hơn!
+            </div>
+        </div>
+
+        <div class="button-container fade-in delay-5">
+            <button class="action-btn btn-restart" onclick="restartGame()">
+                🔄 CHƠI LẠI
+            </button>
+            <button class="action-btn btn-menu" onclick="returnToMenu()">
+                🏠 VỀ MENU
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Get game stats from localStorage or URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const levelReached = parseInt(urlParams.get('level')) || 1;
+        const attempts = parseInt(urlParams.get('attempts')) || 0;
+        const totalLevels = 16;
+
+        // Update stats
+        document.getElementById('level-reached').textContent = levelReached;
+        document.getElementById('attempts').textContent = attempts;
+
+        // Calculate and animate progress
+        const progressPercent = Math.round((levelReached / totalLevels) * 100);
+        setTimeout(() => {
+            document.getElementById('progress-fill').style.width = progressPercent + '%';
+            animateNumber('progress-percent', 0, progressPercent, 2000);
+        }, 1000);
+
+        // Animate number counting
+        function animateNumber(elementId, start, end, duration) {
+            const element = document.getElementById(elementId);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.round(current);
+            }, 16);
+        }
+
+        // Dynamic lesson based on level reached
+        function updateLesson() {
+            const lessonText = document.getElementById('lesson-text');
+            
+            if (levelReached <= 5) {
+                lessonText.innerHTML = `
+                    Bạn đã dừng lại ở <strong>Tiểu Học</strong>. 
+                    Đây là giai đoạn tích lũy nền tảng quan trọng nhất. 
+                    Hãy kiên nhẫn luyện tập để nắm vững <strong>độ đo LƯỢNG</strong> - 
+                    biết khi nào cầu đủ dài để vượt qua, khi nào cần dừng lại.
+                    <br><br>
+                    <em>"Từng bước nhỏ kiên trì sẽ dẫn đến bước nhảy lớn!"</em>
+                `;
+            } else if (levelReached <= 9) {
+                lessonText.innerHTML = `
+                    Bạn đã tiến tới <strong>Trung Học Cơ Sở</strong>! 
+                    Đây là lúc độ khó tăng lên, yêu cầu bạn <strong>chính xác hơn</strong>. 
+                    Việc tích lũy LƯỢNG không chỉ là nhiều, mà phải <strong>đúng loại, đúng lúc</strong>.
+                    <br><br>
+                    <em>"Chất không thay đổi khi lượng chưa đủ điểm nút!"</em>
+                `;
+            } else if (levelReached <= 12) {
+                lessonText.innerHTML = `
+                    Bạn đã vào <strong>Trung Học Phổ Thông</strong>! 
+                    Giai đoạn này kiểm nghiệm khả năng <strong>kiểm soát và điều chỉnh</strong>. 
+                    Bạn đã trải nghiệm sự khác biệt giữa nóng vội (Tả) và chậm trễ (Hữu).
+                    <br><br>
+                    <em>"Bước nhảy chất chỉ xảy ra khi đủ điều kiện - không sớm, không muộn!"</em>
+                `;
+            } else {
+                lessonText.innerHTML = `
+                    Bạn đã tiến rất xa, gần chạm tới <strong>Đại Học</strong>! 
+                    Chỉ còn một chút nữa để hoàn thành hành trình. 
+                    Độ khó tăng gấp đôi nhưng bạn đã tích lũy đủ kinh nghiệm.
+                    <br><br>
+                    <em>"Thành công là khi bạn không bỏ cuộc dù thất bại nhiều lần!"</em>
+                `;
+            }
+        }
+
+        updateLesson();
+
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.width = particle.style.height = (Math.random() * 4 + 2) + 'px';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Button functions
+        function restartGame() {
+            // Save that user wants to restart
+            sessionStorage.setItem('restart_game', 'true');
+            window.location.href = 'index.html';
+        }
+
+        function returnToMenu() {
+            window.location.href = 'intro.html';
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' || e.key === 'R') {
+                restartGame();
+            } else if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -824,7 +824,7 @@
     <div class="skip-hint">[ SPACE ] tiếp tục</div>
     
     <div class="sound-controls">
-        <button class="sound-btn" id="musicToggle" onclick="toggleMusic()">🎵</button>
+
         <button class="sound-btn active" id="sfxToggle" onclick="toggleSFX()">🔊</button>
     </div>
     
@@ -1012,164 +1012,201 @@
         let typingInterval;
 
         // Initialize Web Audio API
-        function initAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                musicGainNode = audioContext.createGain();
-                sfxGainNode = audioContext.createGain();
-                
-                musicGainNode.connect(audioContext.destination);
-                sfxGainNode.connect(audioContext.destination);
-                
-                musicGainNode.gain.value = 0.5;
-                sfxGainNode.gain.value = 0.8;
-                
-                console.log("Audio initialized successfully");
-            } catch (e) {
-                console.warn("Web Audio API not supported:", e);
-            }
-        }
+function initAudio() {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        musicGainNode = audioContext.createGain();
+        sfxGainNode = audioContext.createGain();
+        
+        musicGainNode.connect(audioContext.destination);
+        sfxGainNode.connect(audioContext.destination);
+        
+        // GIẢM VOLUME TỔNG để âm thanh nhẹ nhàng hơn
+        musicGainNode.gain.value = 0.3;  // Giảm từ 0.5 xuống 0.3
+        sfxGainNode.gain.value = 0.5;    // Giảm từ 0.8 xuống 0.5
+        
+        console.log("Audio initialized successfully - Light & Mysterious mode");
+    } catch (e) {
+        console.warn("Web Audio API not supported:", e);
+    }
+}
 
         // Audio generation functions
-        function createSound(type) {
-            if (!audioContext || !isSFXEnabled) return null;
-            
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(sfxGainNode);
-            
-            switch(type) {
-                case 'typing':
-                    oscillator.type = 'sine';
-                    oscillator.frequency.value = 800 + Math.random() * 400;
-                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
-                    oscillator.start();
-                    oscillator.stop(audioContext.currentTime + 0.05);
-                    return oscillator;
-                    
-                case 'glitch1':
-                    oscillator.type = 'square';
-                    oscillator.frequency.value = 200;
-                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                    oscillator.start();
-                    oscillator.stop(audioContext.currentTime + 0.3);
-                    return oscillator;
-                    
-                case 'shatter':
-                    for(let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            const osc = audioContext.createOscillator();
-                            const gain = audioContext.createGain();
-                            osc.connect(gain);
-                            gain.connect(sfxGainNode);
-                            
-                            osc.type = 'sine';
-                            osc.frequency.value = 600 + Math.random() * 800;
-                            gain.gain.setValueAtTime(0.15, audioContext.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                            
-                            osc.start();
-                            osc.stop(audioContext.currentTime + 0.5);
-                        }, i * 50);
-                    }
-                    break;
-                    
-                case 'revelation':
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 2);
-                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.5);
-                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
-                    oscillator.start();
-                    oscillator.stop(audioContext.currentTime + 2);
-                    return oscillator;
-                    
-                case 'enlightenment':
-                    oscillator.type = 'triangle';
-                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 3);
-                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 1);
-                    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 3);
-                    oscillator.start();
-                    oscillator.stop(audioContext.currentTime + 3);
-                    return oscillator;
-            }
-            
-            return oscillator;
-        }
-
-        function playBackgroundMusic(sceneType) {
-            if (!audioContext || !isMusicEnabled) return;
-            
-            if (currentMusicSource) {
-                currentMusicSource.stop();
-            }
-            
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(musicGainNode);
-            
-            oscillator.type = 'sine';
-            gainNode.gain.value = 0.1;
-            
-            switch(sceneType) {
-                case 'celebration':
-                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-                    break;
-                case 'revelation':
-                    oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime);
-                    break;
-                case 'choice':
-                    oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime);
-                    break;
-                default:
-                    oscillator.frequency.value = 293.66;
-            }
-            
+function createSound(type) {
+    if (!audioContext || !isSFXEnabled) return null;
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(sfxGainNode);
+    
+    // Thêm filter cho tất cả âm thanh để mềm mại hơn
+    const filter = audioContext.createBiquadFilter();
+    oscillator.disconnect();
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 0.5;
+    
+    switch(type) {
+        case 'typing':
+            oscillator.type = 'sine'; // Đổi từ sine sang triangle cho mềm hơn
+            oscillator.frequency.value = 600 + Math.random() * 200; // Giảm tần số xuống
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Giảm volume
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
             oscillator.start();
-            currentMusicSource = oscillator;
-        }
-
-        function stopBackgroundMusic() {
-            if (currentMusicSource) {
-                currentMusicSource.stop();
-                currentMusicSource = null;
+            oscillator.stop(audioContext.currentTime + 0.05);
+            break;
+            
+        case 'glitch1':
+            oscillator.type = 'triangle'; // Đổi từ square sang triangle
+            oscillator.frequency.value = 150; // Giảm tần số
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Giảm volume
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+            break;
+            
+        case 'shatter':
+            for(let i = 0; i < 6; i++) { // Giảm số lượng âm thanh shatter
+                setTimeout(() => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    const filt = audioContext.createBiquadFilter();
+                    
+                    osc.connect(filt);
+                    filt.connect(gain);
+                    gain.connect(sfxGainNode);
+                    
+                    filt.type = 'lowpass';
+                    filt.frequency.value = 1500;
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = 400 + Math.random() * 400; // Giảm tần số
+                    gain.gain.setValueAtTime(0.08, audioContext.currentTime); // Giảm volume
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+                    
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.5);
+                }, i * 80); // Tăng khoảng cách giữa các âm thanh
             }
-        }
+            break;
+            
+        case 'revelation':
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(180, audioContext.currentTime); // Giảm tần số thấp
+            oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 2); // Tăng dần
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.5); // Giảm peak volume
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 2);
+            break;
+            
+        case 'enlightenment':
+            oscillator.type = 'sine'; // Đổi từ triangle sang sine
+            oscillator.frequency.setValueAtTime(250, audioContext.currentTime); // Tần số thấp hơn
+            oscillator.frequency.exponentialRampToValueAtTime(900, audioContext.currentTime + 3); // Tăng dần
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 1); // Giảm peak volume
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 3);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 3);
+            break;
+    }
+    
+    return oscillator;
+}
+
+function playBackgroundMusic(sceneType) {
+
+
+}
+
+function stopBackgroundMusic() {
+
+}
 
         function playSceneSound(soundType) {
             if (!audioContext || !isSFXEnabled) return;
             
             switch(soundType) {
-                case 'celebrate':
-                    createSound('typing');
-                    break;
-                case 'systemError':
-                    for(let i = 0; i < 5; i++) {
-                        setTimeout(() => {
-                            const osc = audioContext.createOscillator();
-                            const gain = audioContext.createGain();
-                            osc.connect(gain);
-                            gain.connect(sfxGainNode);
-                            
-                            osc.type = 'square';
-                            osc.frequency.value = 100 + Math.random() * 200;
-                            gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                            
-                            osc.start();
-                            osc.stop(audioContext.currentTime + 0.2);
-                        }, i * 100);
-                    }
-                    break;
+        case 'celebrate':
+            // Âm thanh chúc mừng nhẹ nhàng
+            for(let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(sfxGainNode);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = 440 + i * 100; // Tăng dần
+                    gain.gain.setValueAtTime(0.03, audioContext.currentTime); // Rất nhẹ
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+                    
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.2);
+                }, i * 200);
+            }
+            break;
+
+        case 'positive':
+            // Âm thanh tích cực nhẹ nhàng
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(sfxGainNode);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(329.63, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(659.25, audioContext.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.03, audioContext.currentTime); // Rất nhẹ
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.3);
+            break;
+
+        case 'suspense':
+            // Âm thanh hồi hộp nhưng nhẹ nhàng
+            const suspenseOsc = audioContext.createOscillator();
+            const suspenseGain = audioContext.createGain();
+            suspenseOsc.connect(suspenseGain);
+            suspenseGain.connect(sfxGainNode);
+            
+            suspenseOsc.type = 'sine';
+            suspenseOsc.frequency.setValueAtTime(220, audioContext.currentTime);
+            suspenseOsc.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.8);
+            suspenseGain.gain.setValueAtTime(0.02, audioContext.currentTime); // Rất nhẹ
+            suspenseGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.8);
+            
+            suspenseOsc.start();
+            suspenseOsc.stop(audioContext.currentTime + 0.8);
+            break;
+
+                    case 'systemError':
+            // Âm thanh lỗi hệ thống nhưng không quá chói
+            for(let i = 0; i < 4; i++) {
+                setTimeout(() => {
+                    const errorOsc = audioContext.createOscillator();
+                    const errorGain = audioContext.createGain();
+                    errorOsc.connect(errorGain);
+                    errorGain.connect(sfxGainNode);
+                    
+                    errorOsc.type = 'triangle'; // Đổi từ square sang triangle
+                    errorOsc.frequency.value = 80 + Math.random() * 100; // Tần số thấp hơn
+                    errorGain.gain.setValueAtTime(0.08, audioContext.currentTime); // Giảm volume
+                    errorGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+                    
+                    errorOsc.start();
+                    errorOsc.stop(audioContext.currentTime + 0.15);
+                }, i * 150);
+            }
+            break;
+            
                 case 'corruption':
                     const noise = audioContext.createBufferSource();
                     const bufferSize = audioContext.sampleRate * 2;
@@ -1196,17 +1233,18 @@
             }
         }
 
-        function toggleMusic() {
-            isMusicEnabled = !isMusicEnabled;
-            const btn = document.getElementById('musicToggle');
-            btn.classList.toggle('active', isMusicEnabled);
-            
-            if (!isMusicEnabled) {
-                stopBackgroundMusic();
-            } else if (currentScene < twistScenes.length) {
-                playBackgroundMusic(twistScenes[currentScene].background);
-            }
-        }
+function toggleMusic() {
+    isMusicEnabled = !isMusicEnabled;
+    const btn = document.getElementById('musicToggle');
+    btn.classList.toggle('active', isMusicEnabled);
+    
+    // Thay vì dừng nhạc nền, có thể thêm thông báo
+    if (!isMusicEnabled) {
+        console.log("🎵 Nhạc nền đã được tắt (không có nhạc nền)");
+    } else {
+        console.log("🎵 Nhạc nền đã được bật (không có nhạc nền)");
+    }
+}
 
         function toggleSFX() {
             isSFXEnabled = !isSFXEnabled;
@@ -1345,11 +1383,11 @@
             
             // Play background music
             if (scene.background.includes('celebration')) {
-                playBackgroundMusic('celebration');
+
             } else if (scene.background.includes('revelation')) {
-                playBackgroundMusic('revelation');
+               
             } else if (scene.background.includes('choice')) {
-                playBackgroundMusic('choice');
+                
             }
             
             if (scene.text) {
@@ -1858,7 +1896,7 @@ async function createCorruptionTerminal(container) {
                 },
                 {
                     icon: createChoiceIcon('exit'),
-                    title: 'Thoát game',
+                    title: 'Thoát khỏi thế giới này',
                     desc: 'Áp dụng bài học vào thế giới thực - Nơi vòng xoáy ốc thực sự',
                     action: 'exit'
                 }
@@ -1924,35 +1962,21 @@ async function createCorruptionTerminal(container) {
             setTimeout(() => {
                 switch(choice) {
                     case 'restart':
-                        text.innerHTML = '';
-                        typeText(text, 'Bạn đã chọn tiếp tục hành trình\nVòng xoáy ốc tri thức\nchưa bao giờ kết thúc...', 70);
-                        setTimeout(() => {
-                            alert('🔄 Game sẽ restart!\n\n(Trong game thật: reload game về Lớp 1 nhưng với player memory được giữ lại - New Game+ mode)');
-                        }, 8500);
+                        // Chuyển đến màn hình new game plus
+                        window.location.href = 'newgame-plus.html';
                         break;
                         
                     case 'accept':
-                        text.innerHTML = '';
-                        typeText(text, 'Chúc mừng!\nBạn đã thực sự trở thành\nGiác Ngộ Giả', 60);
-                        setTimeout(() => {
-                            typeText(text, '\n\n"Tri thức thực sự không đo bằng bằng cấp\nmà bằng khả năng không ngừng học hỏi"', 50);
-                        }, 5000);
-                        setTimeout(() => {
-                            alert('🏆 GAME COMPLETED!\n\nBạn đã hoàn thành hành trình và đạt được giác ngộ thực sự.');
-                        }, 12000);
+                        // Chuyển đến màn hình chúc mừng hoàn thành
+                        window.location.href = 'true-ending.html';
                         break;
                         
                     case 'exit':
-                        text.innerHTML = '';
-                        typeText(text, 'Bạn đã chọn rời khỏi game\nNhưng nhớ rằng:\nHọc tập trong đời thực\ncũng là một vòng xoáy ốc...', 60);
-                        setTimeout(() => {
-                            alert('💙 Cảm ơn bạn đã chơi "Con Đường Học Vấn"!\n\nNhớ rằng: Trong cuộc sống, việc học không bao giờ kết thúc.');
-                        }, 10000);
+                        // Chuyển đến màn hình thoát game có thông điệp
+                        window.location.href = 'real-world-ending.html';
                         break;
                 }
-                
-                fadeEl.classList.add('hidden');
-            }, 2000);
+            }, 1000);
         }
 
         function nextScene() {

@@ -1,3 +1,5 @@
+/* FILE: main.css */
+
 body {
     margin: 0;
     overflow: hidden;
@@ -13,6 +15,8 @@ body {
     justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    z-index: 100;
 }
 
 .menu-content {
@@ -152,8 +156,26 @@ body {
 }
 
 #game-container {
+    position: relative;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
+}
+
+/* LỚP NỀN CHUNG */
+#game-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    transform: scale(1.1); /* tránh viền trắng do blur */
+    z-index: 0;
+}
+
+/* GAME CONTENT */
+#game-container > * {
     position: relative;
     background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
     transition: background 0.8s ease; /* Hiệu ứng chuyển background mượt */
@@ -504,65 +526,6 @@ button {
     50% { transform: translateY(-20px); }
 }
 
-/* Tutorial Overlay */
-#tutorial-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.92);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 300;
-}
-
-.tutorial-content {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px 50px;
-    border-radius: 20px;
-    max-width: 600px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    color: white;
-}
-
-.tutorial-content h2 {
-    font-size: 36px;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-#tutorial-progress {
-    font-size: 14px;
-    margin-bottom: 20px;
-    opacity: 0.8;
-}
-
-#tutorial-text {
-    font-size: 18px;
-    line-height: 1.8;
-    margin: 30px 0;
-    min-height: 200px;
-    text-align: left;
-    background: rgba(255,255,255,0.1);
-    padding: 25px;
-    border-radius: 12px;
-    white-space: pre-wrap;
-}
-
-#tutorial-next {
-    padding: 15px 40px;
-    font-size: 18px;
-    background: white;
-    color: #667eea;
-    font-weight: bold;
-    transition: all 0.3s;
-}
-
-#tutorial-next:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
-}
 /* Tutorial Overlay */
 #tutorial-overlay {
     position: fixed;
