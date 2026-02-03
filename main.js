@@ -534,6 +534,31 @@ window.addEventListener("mousedown", () => {
     isAnimating
   )
     return;
+  startBridgeGrowth();
+});
+
+// Xử lý sự kiện nhấn phím Space để Tích lũy Lượng
+window.addEventListener("keydown", (e) => {
+  if (e.code !== "Space") return;
+  e.preventDefault(); // Ngăn scroll trang
+  
+  const gameContainer = document.getElementById("game-container");
+  const leapOverlay = document.getElementById("leap-complete-overlay");
+  // Ngăn click khi có bất kỳ overlay nào đang hiển thị
+  if (
+    gameContainer.classList.contains("hidden") ||
+    !msgOverlay.classList.contains("hidden") ||
+    !quizOverlay.classList.contains("hidden") ||
+    leapOverlay ||
+    isAnimating ||
+    isHolding // Ngăn spam Space
+  )
+    return;
+  startBridgeGrowth();
+});
+
+// Hàm bắt đầu xây cầu (dùng chung cho chuột và phím)
+function startBridgeGrowth() {
   isHolding = true;
 
   // Tốc độ xây cầu tăng theo cấp độ
@@ -561,7 +586,7 @@ window.addEventListener("mousedown", () => {
       }
     }
   }, 30);
-});
+}
 
 // Xử lý sự kiện thả chuột để thực hiện Bước nhảy (cầu rơi xuống)
 window.addEventListener("mouseup", () => {
@@ -576,10 +601,33 @@ window.addEventListener("mouseup", () => {
     isAnimating
   )
     return;
+  releaseBridge();
+});
+
+// Xử lý sự kiện thả phím Space để thực hiện Bước nhảy
+window.addEventListener("keyup", (e) => {
+  if (e.code !== "Space") return;
+  
+  const gameContainer = document.getElementById("game-container");
+  const leapOverlay = document.getElementById("leap-complete-overlay");
+  // Ngăn click khi có bất kỳ overlay nào đang hiển thị
+  if (
+    gameContainer.classList.contains("hidden") ||
+    !quizOverlay.classList.contains("hidden") ||
+    leapOverlay ||
+    !isHolding ||
+    isAnimating
+  )
+    return;
+  releaseBridge();
+});
+
+// Hàm thả cầu (dùng chung cho chuột và phím)
+function releaseBridge() {
   isHolding = false;
   clearInterval(growInterval);
   dropBridge();
-});
+}
 
 // Cầu rơi xuống (xoay 90 độ)
 function dropBridge() {
