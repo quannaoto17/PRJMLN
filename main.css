@@ -156,7 +156,34 @@ body {
     height: 100vh;
     position: relative;
     background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    transition: background 0.8s ease; /* Hiệu ứng chuyển background mượt */
 }
+
+/* ===== BACKGROUND THEO TỪNG CẤP HỌC ===== */
+/* Tiểu Học Cơ Sở (Level 1-5) */
+#game-container.bg-chapter-0 {
+    background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+    /* Chèn ảnh Tiểu học: background-image: url('images/tieu-hoc.jpg'); background-size: cover; */
+}
+
+/* Trung Học Cơ Sở (Level 6-9) */
+#game-container.bg-chapter-1 {
+    background: linear-gradient(to bottom, #9370DB, #E6E6FA);
+    /* Chèn ảnh THCS: background-image: url('images/thcs.jpg'); background-size: cover; */
+}
+
+/* Trung Học Phổ Thông (Level 10-12) */
+#game-container.bg-chapter-2 {
+    background: linear-gradient(to bottom, #8B4513, #D2B48C);
+    /* Chèn ảnh THPT: background-image: url('images/thpt.jpg'); background-size: cover; */
+}
+
+/* Đại Học (Level 13-16) - Hell Mode */
+#game-container.bg-chapter-3 {
+    background: linear-gradient(to bottom, #8B0000, #DC143C);
+    /* Chèn ảnh Đại học: background-image: url('images/dai-hoc.jpg'); background-size: cover; */
+}
+/* ===== KẾT THÚC BACKGROUND ===== */
 
 #ui-layer {
     position: absolute;

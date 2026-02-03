@@ -801,6 +801,9 @@ function updateQuality() {
     levelName.innerText = chapterName + " - " + levelNameText;
     player.innerText = levels[currentLevel].icon;
     
+    // Cập nhật background theo màn
+    updateBackground();
+    
     // Cảnh báo nếu đang ở Đại học
     if (isInCollege()) {
         const deathInfo = deathCount > 0 ? ` | Chết: ${deathCount} lần` : "";
@@ -816,6 +819,22 @@ function updateQuality() {
         document.getElementById('instruction').style.color = "black";
         document.getElementById('instruction').style.fontWeight = "normal";
     }
+}
+
+// Cập nhật background theo cấp học (chapter)
+function updateBackground() {
+    const container = document.getElementById('game-container');
+    if (!container) return;
+    
+    // Xóa tất cả class background cũ (4 cấp học: 0-3)
+    for (let i = 0; i <= 3; i++) {
+        container.classList.remove(`bg-chapter-${i}`);
+    }
+    
+    // Thêm class background mới theo currentChapter
+    container.classList.add(`bg-chapter-${currentChapter}`);
+    const chapterNames = ['Tiểu Học', 'THCS', 'THPT', 'Đại Học'];
+    console.log(`🎨 Background đổi sang ${chapterNames[currentChapter]}`);
 }
 
 // Cập nhật hiển thị mạng
