@@ -643,18 +643,19 @@ function successLeap() {
 
     // Kiểm tra checkpoint (Lớp 5, 9, 12) - Kỳ thi chuyển cấp
     if (currentLevelNum == 6) {
-      isAnimating = false;
-      startCheckpointQuiz(5);
+      // Hiện tutorial TRƯỚC, sau đó mới thi
+      pendingQuizGrade = 5; // Đánh dấu có quiz đang chờ
+      setTimeout(() => {
+        startTutorial('level6');
+      }, 1000);
       return;
     }
     if (currentLevelNum == 10) {
-      isAnimating = false;
-      startCheckpointQuiz(9);
+      startCheckpointWithCountdown(9);
       return;
     }
     if (currentLevelNum == 13) {
-      isAnimating = false;
-      startCheckpointQuiz(12);
+      startCheckpointWithCountdown(12);
       return;
     }
 
@@ -669,6 +670,12 @@ function successLeap() {
     }
 
     scoreDisplay.innerText = currentLevelNum + " / 16";
+    
+    // THOẠI: Vượt cột mốc thành công (BỞ QUA nếu là level 6 - đang có tutorial)
+    if (currentLevelNum !== 6) {
+      const successDialogue = `🎉 Vượt qua Lớp ${currentLevelNum - 1} thành công!\n\nĐã nắm bắt đúng Điểm Nút chuyển hóa từ LƯỢNG sang CHẤT!`;
+      showDialogueNotification(successDialogue);
+    }
 
     // Hiệu ứng visual cho Bước nhảy thành công
     document.body.classList.add("leap-success");
@@ -1128,6 +1135,32 @@ function returnToMenu() {
   resetGame();
 }
 
+// Hàm hiển thị thoại notification
+function showDialogueNotification(text) {
+  // Nếu đang tutorial thì không hiển thị thoại thường
+  if (isTutorialActive) return;
+  
+  const notification = document.getElementById('dialogue-notification');
+  const textEl = document.getElementById('dialogue-text');
+  if (!notification || !textEl) return;
+  
+  textEl.innerText = text;
+  notification.style.display = 'block';
+  notification.style.position = 'fixed';
+  notification.style.top = '130px';
+  notification.style.left = '50%';
+  notification.style.transform = 'translateX(-50%)';
+  
+  // Ẩn nút skip cho thoại thường
+  const skipBtn = document.getElementById('dialogue-skip');
+  if (skipBtn) skipBtn.style.display = 'none';
+  
+  // Tự động ẩn sau 3 giây
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
+}
+
 // Hàm bắt đầu game từ main menu
 function startGame() {
   document.getElementById("main-menu").classList.add("hidden");
@@ -1151,6 +1184,181 @@ function initGame() {
 
   updateQuality();
   nextTurn();
+  
+  // Hiển thị tutorial level 1 khi vào từ intro
+  const fromIntro = sessionStorage.getItem('from_intro');
+  if (fromIntro === 'true') {
+    sessionStorage.removeItem('from_intro');
+    setTimeout(() => {
+      startTutorial('level1');
+    }, 1000);
+  }
+}
+
+// ===== HỆ THỐNG TUTORIAL =====
+
+// Hàm helper: Hiển countdown trước khi bắt đầu thi
+function startCheckpointWithCountdown(grade) {
+  const countdownDisplay = document.getElementById('countdown-display');
+  if (!countdownDisplay) {
+    isAnimating = false;
+    startCheckpointQuiz(grade);
+    return;
+  }
+  
+  let countdown = 3;
+  countdownDisplay.innerText = `Bắt đầu thi trong ${countdown}s...`;
+  countdownDisplay.style.display = 'block';
+  
+  const countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      countdownDisplay.innerText = `Bắt đầu thi trong ${countdown}s...`;
+    } else {
+      clearInterval(countdownInterval);
+      countdownDisplay.style.display = 'none';
+      isAnimating = false;
+      startCheckpointQuiz(grade); // Bắt đầu thi!
+    }
+  }, 1000);
+}
+
+const tutorialData = {
+  level1: [
+    "🎯 Chào mừng đến với Con Đường Học Vấn!\n\nTrò chơi này về Quy luật: LƯỢNG ⟹ CHẤT",
+    "📚 LƯỢNG là sự tích lũy dần dần\n(Nhấn giữ chuột = độ dài cây cầu)\n\n✨ CHẤT là bước nhảy vượt bậc\n(Sang cột tiếp theo = thành công)",
+    "⚖️ ĐIỂM NÚT: Khoảng cách vừa đủ để cầu chạm cột\n\n⚠️ TẢ KHUYNH: Cầu quá ngắn (nôn nóng!)\n❌ HỮU KHUYNH: Cầu quá dài (trì trệ!)\n✅ CHÍNH XÁC: Vừa đủ lượng, đúng lúc!"
+  ],
+  level6: [
+    "📝 Sắp đến Kỳ thi Chuyển cấp!\n\nBạn sẽ trả lời các câu hỏi biện chứng\ncủa môn Triết học 1 (MLN111)",
+    "🎯 Quy tắc thi:\n• Trả lời đúng ≥ 50% số câu hỏi\n• Trong thời gian quy định\n• Đậu = Tiếp tục THCS\n• Trượt = Về đầu Tiểu học",
+    "💡 Nội dung thi:\nCác khái niệm biện chứng cơ bản:\n• QUY LUẬT LƯỢNG - CHẤT\n• ĐIỂM NÚT chuyển hóa\n• TẢ KHUYNH và HỮU KHUYNH\n\nĐọc kỹ câu hỏi trước khi chọn!"
+  ]
+};
+
+let currentTutorialMessages = [];
+let currentTutorialIndex = 0;
+let typingInterval = null;
+let isTutorialActive = false;
+let pendingQuizGrade = null; // Lưu grade của quiz đang chờ sau tutorial
+
+function startTutorial(levelKey) {
+  if (!tutorialData[levelKey]) return;
+  
+  currentTutorialMessages = tutorialData[levelKey];
+  currentTutorialIndex = 0;
+  isTutorialActive = true;
+  isAnimating = true; // Khóa game
+  
+  showTutorialMessage();
+}
+
+function showTutorialMessage() {
+  if (currentTutorialIndex >= currentTutorialMessages.length) {
+    endTutorial();
+    return;
+  }
+  
+  const message = currentTutorialMessages[currentTutorialIndex];
+  const notification = document.getElementById('dialogue-notification');
+  const textEl = document.getElementById('dialogue-text');
+  const skipBtn = document.getElementById('dialogue-skip');
+  
+  if (!notification || !textEl) return;
+  
+  // Hiển thị notification
+  notification.style.display = 'block';
+  notification.style.position = 'fixed';
+  notification.style.top = '130px';
+  textEl.innerText = '';
+  
+  // Hiển thị nút Skip
+  if (skipBtn) {
+    skipBtn.style.display = 'inline-block';
+    skipBtn.onclick = skipToNextTutorialMessage;
+  }
+  
+  // Typing animation
+  let charIndex = 0;
+  clearInterval(typingInterval);
+  typingInterval = setInterval(() => {
+    if (charIndex < message.length) {
+      textEl.innerText += message.charAt(charIndex);
+      charIndex++;
+    } else {
+      clearInterval(typingInterval);
+      // Tự động chuyển sau 4 giây
+      setTimeout(() => {
+        if (isTutorialActive) {
+          nextTutorialMessage();
+        }
+      }, 4000);
+    }
+  }, 50);
+}
+
+function skipToNextTutorialMessage() {
+  clearInterval(typingInterval);
+  const message = currentTutorialMessages[currentTutorialIndex];
+  const textEl = document.getElementById('dialogue-text');
+  if (textEl) {
+    textEl.innerText = message; // Hiển thị toàn bộ
+  }
+  // Chuyển ngay
+  setTimeout(nextTutorialMessage, 500);
+}
+
+function nextTutorialMessage() {
+  currentTutorialIndex++;
+  showTutorialMessage();
+}
+
+function endTutorial() {
+  clearInterval(typingInterval);
+  isTutorialActive = false;
+  
+  const notification = document.getElementById('dialogue-notification');
+  const skipBtn = document.getElementById('dialogue-skip');
+  
+  // Ẩn nút skip
+  if (skipBtn) skipBtn.style.display = 'none';
+  
+  // Ẩn notification
+  if (notification) {
+    setTimeout(() => {
+      notification.style.display = 'none';
+    }, 500);
+  }
+  
+  // Kiểm tra nếu có quiz đang chờ
+  if (pendingQuizGrade !== null) {
+    const grade = pendingQuizGrade;
+    pendingQuizGrade = null; // Reset
+    startCheckpointWithCountdown(grade);
+    return;
+  }
+  
+  // Hiển thị countdown 5s trước khi cho phép chơi (tutorial bình thường)
+  const countdownDisplay = document.getElementById('countdown-display');
+  if (countdownDisplay) {
+    let countdown = 5;
+    countdownDisplay.innerText = countdown;
+    countdownDisplay.style.display = 'block';
+    
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        countdownDisplay.innerText = countdown;
+      } else {
+        clearInterval(countdownInterval);
+        countdownDisplay.style.display = 'none';
+        isAnimating = false; // Mở khóa game
+        console.log("✅ Tutorial hoàn thành! Có thể chơi!");
+      }
+    }, 1000);
+  } else {
+    isAnimating = false;
+  }
 }
 
 // ===== HỆ THỐNG QUIZ =====
