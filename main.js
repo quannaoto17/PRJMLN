@@ -1183,15 +1183,18 @@ function initGame() {
   bridge.style.opacity = "1";
 
   updateQuality();
-  nextTurn();
   
   // Hiển thị tutorial level 1 khi vào từ intro
   const fromIntro = sessionStorage.getItem('from_intro');
   if (fromIntro === 'true') {
     sessionStorage.removeItem('from_intro');
+    isAnimating = true; // Khóa game ngay để tránh click trước tutorial
+    nextTurn();
     setTimeout(() => {
       startTutorial('level1');
-    }, 1000);
+    }, 300); // Giảm từ 1000ms xuống 300ms
+  } else {
+    nextTurn();
   }
 }
 
