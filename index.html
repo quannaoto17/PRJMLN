@@ -6,10 +6,17 @@
     <title>The Dialectical Bridge - Triết học 4.0</title>
     <link rel="stylesheet" href="main.css?v=11">
     <script>
-        // Tự động redirect sang intro.html nếu không đến từ intro
-        // (Bạn có thể comment dòng này lại khi đang test để đỡ bị chuyển trang)
-        if (!sessionStorage.getItem('from_intro')) {
-            // window.location.href = 'intro.html'; 
+        // Tự động redirect sang intro.html nếu không đến từ intro và không phải chơi lại
+        const fromIntro = sessionStorage.getItem('from_intro');
+        const restartGame = sessionStorage.getItem('restart_game');
+        
+        if (!fromIntro && !restartGame) {
+            window.location.href = 'intro.html'; 
+        }
+        
+        // Xóa restart_game flag sau khi đã kiểm tra
+        if (restartGame) {
+            sessionStorage.removeItem('restart_game');
         }
     </script>
 </head>
