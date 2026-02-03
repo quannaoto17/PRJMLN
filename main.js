@@ -1211,7 +1211,7 @@ function initGame() {
     
     updateQuality();
     nextTurn();
-    heckNewGamePlus();
+    checkNewGamePlus();
     // Hiển thị tutorial level 1 khi vào từ intro
     const fromIntro = sessionStorage.getItem('from_intro');
     if (fromIntro === 'true') {
