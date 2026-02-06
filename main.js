@@ -31,6 +31,9 @@ const maxVisiblePassedPillars = 5; // Hiển thị tối đa 5 cột đã qua
 // Lưu vị trí ban đầu của cột tiếp theo (trước khi di chuyển)
 let initialNextPillarLeft = 0;
 
+// Khóa việc submit nhiều lần
+let isSubmitting = false;
+
 // Hệ thống độ khó tăng dần khi chết
 let deathCount = 0; // Số lần chết ở màn hiện tại
 let lastDeathLevel = 0; // Level cuối cùng chết
@@ -38,6 +41,12 @@ let lastDeathLevel = 0; // Level cuối cùng chết
 // Hệ thống mạng (lives)
 let lives = 5; // Số mạng còn lại
 const maxLives = 5; // Tối đa 5 mạng mỗi màn
+
+// Thống kê game
+let totalAttempts = 0; // Tổng số lần thử
+let totalDeaths = 0; // Tổng số lần chết
+let maxLevelReached = 1; // Level cao nhất đạt được
+let sessionStartTime = Date.now(); // Thời gian bắt đầu session
 
 // TEST MODE
 let testMode = false;
@@ -733,6 +742,11 @@ function successLeap() {
   // Đợi animation player hoàn thành trước khi chuyển màn
   setTimeout(() => {
     currentLevelNum++;
+    
+    // Cập nhật level cao nhất đạt được
+    if (currentLevelNum > maxLevelReached) {
+      maxLevelReached = currentLevelNum;
+    }
 
     // Kiểm tra checkpoint (Lớp 5, 9, 12) - Kỳ thi chuyển cấp
     if (currentLevelNum == 6) {
@@ -1011,12 +1025,26 @@ function handleRetry() {
 
   // Giảm 1 mạng
   lives--;
+  totalDeaths++;
+  totalAttempts++;
   updateLivesDisplay();
 
   console.log(`❤️ Còn ${lives} mạng`);
 
   // Kiểm tra hết mạng → Chuyển nhanh sang game-over.html
   if (lives <= 0) {
+    // Lưu stats vào localStorage
+    const gameStats = {
+      levelReached: currentLevelNum,
+      maxLevelReached: Math.max(maxLevelReached, currentLevelNum),
+      totalAttempts: totalAttempts,
+      totalDeaths: totalDeaths + 1,
+      sessionTime: Math.floor((Date.now() - sessionStartTime) / 1000), // giây
+      completionPercent: Math.round((currentLevelNum / 16) * 100),
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('gameOverStats', JSON.stringify(gameStats));
+    
     setTimeout(() => {
       window.location.href = "game-over.html";
     }, 300);
@@ -1417,7 +1445,7 @@ const tutorialData = {
   ],
   level6: [
     "📝 Sắp đến Kỳ thi Chuyển cấp!\n\nBạn sẽ trả lời các câu hỏi biện chứng\ncủa môn Triết học 1 (MLN111)",
-    "🎯 Quy tắc thi:\n• Trả lời đúng ≥ 50% số câu hỏi\n• Trong thời gian quy định\n• Đậu = Tiếp tục THCS\n• Trượt = Về đầu Tiểu học",
+    "🎯 Quy tắc thi:\n• Trả lời đúng ≥ 50% số câu hỏi\n• Trong thời gian quy định\n• Đậu = Tiếp tục cấp mới\n• Trượt = Học lại từ đầu cấp đó",
     "💡 Nội dung thi:\nCác khái niệm biện chứng cơ bản:\n• QUY LUẬT LƯỢNG - CHẤT\n• ĐIỂM NÚT chuyển hóa\n• TẢ KHUYNH và HỮU KHUYNH\n\nĐọc kỹ câu hỏi trước khi chọn!"
   ]
 };
@@ -1599,6 +1627,8 @@ function showQuestion() {
 
 // Chọn đáp án
 function selectAnswer(index) {
+  if (isSubmitting) return; // Không cho phép chọn khi đang submit
+  
   selectedAnswer = index;
   document.querySelectorAll(".answer-option").forEach((el, i) => {
     el.classList.toggle("selected", i === index);
@@ -1608,7 +1638,11 @@ function selectAnswer(index) {
 
 // Submit đáp án
 function submitAnswer() {
-  if (selectedAnswer === null) return;
+  if (selectedAnswer === null || isSubmitting) return;
+  
+  // Khóa submit ngay lập tức
+  isSubmitting = true;
+  document.getElementById("submit-answer").disabled = true;
 
   const question = currentQuizQuestions[currentQuestionIndex];
   const isCorrect = selectedAnswer === question.correct;
@@ -1627,6 +1661,7 @@ function submitAnswer() {
 
   // Chuyển câu tiếp theo
   setTimeout(() => {
+    isSubmitting = false; // Mở khóa để có thể submit câu tiếp theo
     currentQuestionIndex++;
     if (currentQuestionIndex < currentQuizQuestions.length) {
       showQuestion();
@@ -1655,16 +1690,16 @@ function finishQuiz() {
   quizOverlay.classList.add("hidden");
 
   const config = {
-    5: { required: 1, failTo: 1 },
-    9: { required: 2, failTo: 5 },
-    12: { required: 3, failTo: 9 },
+    5: { required: 1, failTo: 1 },    // Trượt lớp 5 → về đầu tiểu học (lớp 1)
+    9: { required: 2, failTo: 6 },    // Trượt lớp 9 → về đầu THCS (lớp 6)
+    12: { required: 3, failTo: 10 },  // Trượt lớp 12 → về đầu THPT (lớp 10)
   }[checkpointLevel];
 
   if (correctAnswers >= config.required) {
     // Đậu - Tiếp tục
     showLeapComplete();
   } else {
-    // Trượt - Quay về checkpoint trước
+    // Trượt - Quay về đầu cấp học đó
     currentLevelNum = config.failTo;
     currentLevel = currentLevelNum - 1;
     deathCount = 0; // Reset số lần chết

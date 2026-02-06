@@ -450,8 +450,12 @@
                 <div class="stat-value" id="attempts">12</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Mạng đã dùng</div>
-                <div class="stat-value">5 / 5</div>
+                <div class="stat-label">Số lần chết</div>
+                <div class="stat-value" id="total-deaths">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Thời gian chơi</div>
+                <div class="stat-value" id="session-time">0:00</div>
             </div>
         </div>
 
@@ -486,15 +490,36 @@
     </div>
 
     <script>
-        // Get game stats from localStorage or URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const levelReached = parseInt(urlParams.get('level')) || 1;
-        const attempts = parseInt(urlParams.get('attempts')) || 0;
+        // Get game stats from localStorage
+        let gameStats = null;
+        try {
+            const statsData = localStorage.getItem('gameOverStats');
+            if (statsData) {
+                gameStats = JSON.parse(statsData);
+            }
+        } catch (e) {
+            console.error('Error loading game stats:', e);
+        }
+
+        // Use stats from localStorage or fallback to URL params
+        const levelReached = gameStats ? gameStats.levelReached : (parseInt(new URLSearchParams(window.location.search).get('level')) || 1);
+        const attempts = gameStats ? gameStats.totalAttempts : (parseInt(new URLSearchParams(window.location.search).get('attempts')) || 0);
+        const totalDeaths = gameStats ? gameStats.totalDeaths : 0;
+        const sessionTime = gameStats ? gameStats.sessionTime : 0;
         const totalLevels = 16;
+
+        // Format time as MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
 
         // Update stats
         document.getElementById('level-reached').textContent = levelReached;
         document.getElementById('attempts').textContent = attempts;
+        document.getElementById('total-deaths').textContent = totalDeaths;
+        document.getElementById('session-time').textContent = formatTime(sessionTime);
 
         // Calculate and animate progress
         const progressPercent = Math.round((levelReached / totalLevels) * 100);
