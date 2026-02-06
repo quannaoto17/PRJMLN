@@ -474,11 +474,11 @@ function getBridgeSpeed() {
     baseSpeed = 10 + (currentLevelNum - 10) * 1.67;
   } else {
     // Đại học: 15 -> 20
-    baseSpeed = 15 + (currentLevelNum - 13) * 1.25;
+    baseSpeed = 15 + (currentLevelNum - 13) * 1.15;
   }
 
   // Tăng tốc độ mỗi lần chết (+2 mỗi lần thay vì +1.5)
-  const deathPenalty = deathCount * 2;
+  const deathPenalty = deathCount * 1.5;
 
   // Nếu ở Đại học, khó GẤP ĐÔI
   const collegeMultiplier = isInCollege() ? 1.1 : 1;
