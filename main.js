@@ -481,7 +481,7 @@ function getBridgeSpeed() {
   const deathPenalty = deathCount * 2;
 
   // Nếu ở Đại học, khó GẤP ĐÔI
-  const collegeMultiplier = isInCollege() ? 1.5 : 1;
+  const collegeMultiplier = isInCollege() ? 1.1 : 1;
 
   return (baseSpeed + deathPenalty) * collegeMultiplier;
 }
@@ -747,6 +747,10 @@ function successLeap() {
     if (currentLevelNum > maxLevelReached) {
       maxLevelReached = currentLevelNum;
     }
+    
+    // Reset deathCount và tốc độ tăng khi qua màn thành công
+    deathCount = 0;
+    lastDeathLevel = 0;
 
     // Kiểm tra checkpoint (Lớp 5, 9, 12) - Kỳ thi chuyển cấp
     if (currentLevelNum == 6) {
@@ -791,13 +795,10 @@ function successLeap() {
     const isChapterChange = newChapter !== currentChapter;
     if (isChapterChange) {
       currentChapter = newChapter;
-      // Reset tốc độ tăng khi chuyển Giai đoạn (màn mới)
-      deathCount = 0;
-      lastDeathLevel = 0;
-      // Reset mạng khi chuyển màn mới
+      // Reset mạng khi chuyển giai đoạn mới
       lives = maxLives;
       updateLivesDisplay();
-      console.log("🎉 CHUYỂN GIAI ĐOẠN - Reset tốc độ tăng và mạng!");
+      console.log("🎉 CHUYỂN GIAI ĐOẠN - Reset mạng!");
     }
 
     // Tăng độ khó sau mỗi cấp
